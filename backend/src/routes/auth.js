@@ -3,6 +3,22 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth'); // 引入 auth 中介軟體
+
+// @route   GET api/auth
+// @desc    透過 token 取得登入的使用者資訊
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  try {
+    // auth 中介軟體已經驗證了 token，並將 user id 附加到 req.user 上
+    // 我們可以透過 req.user.id 來查詢使用者資料，-password 表示排除密碼欄位
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('伺服器錯誤');
+  }
+});
 
 // @route   POST api/auth/register
 // @desc    註冊新使用者
