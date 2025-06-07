@@ -32,9 +32,17 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/accounts', require('./src/routes/accounts'));
 app.use('/api/transactions', require('./src/routes/transactions'));
+app.use('/api/investments', require('./src/routes/investments'));
+app.use('/api/trades', require('./src/routes/investmentTrades'));
+app.use('/api/dividends', require('./src/routes/dividends'));
+app.use('/api/dashboard', require('./src/routes/dashboard'));
+
+const { scheduleMonthlySnapshot } = require('./src/services/snapshotService');
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`伺服器正在 port ${PORT} 上運行`);
+  // 啟動排程作業
+  scheduleMonthlySnapshot();
 }); 
