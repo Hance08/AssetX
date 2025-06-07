@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import TransactionContext from '../context/transaction/transactionContext';
-import TransactionForm from '..ˇˇˇˇˇˇˇˇ/components/transaction/TransactionForm';
+import TransactionForm from '../components/transaction/TransactionForm';
 import TransactionItem from '../components/transaction/TransactionItem';
 
 const Transactions = () => {
