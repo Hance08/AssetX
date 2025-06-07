@@ -9,7 +9,9 @@ const Account = require('../models/Account');
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.user.id }).sort({ date: -1 });
+    const transactions = await Transaction.find({ userId: req.user.id })
+      .populate('accountId', 'name')
+      .sort({ date: -1 });
     res.json(transactions);
   } catch (err) {
     console.error(err.message);
@@ -54,7 +56,10 @@ router.post('/', auth, async (req, res) => {
     // 3. 更新帳戶餘額
     await Account.findByIdAndUpdate(accountId, { $inc: { balance: finalAmount } });
 
-    res.json(transaction);
+    // 4. 填充新交易的 accountId 以便返回給前端
+    const populatedTransaction = await Transaction.findById(transaction._id).populate('accountId', 'name');
+
+    res.json(populatedTransaction);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('伺服器錯誤');
@@ -91,13 +96,16 @@ router.put('/:id', auth, async (req, res) => {
     // 建立更新物件
     const transactionFields = { date, amount: newAmount, category, accountId, notes };
 
-    transaction = await Transaction.findByIdAndUpdate(
+    let updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
       { $set: transactionFields },
       { new: true }
     );
 
-    res.json(transaction);
+    // 填充更新後的交易，以便返回給前端
+    updatedTransaction = await updatedTransaction.populate('accountId', 'name');
+
+    res.json(updatedTransaction);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('伺服器錯誤');
