@@ -13,6 +13,8 @@ import AuthState from './context/AuthState.jsx';
 import AccountState from './context/account/AccountState.jsx';
 import TransactionState from './context/transaction/TransactionState.jsx';
 import DashboardState from './context/dashboard/DashboardState.jsx';
+import InvestmentState from './context/investment/InvestmentState.jsx';
+import TradeState from './context/trade/TradeState';
 import './App.css';
 
 const AppContent = () => {
@@ -46,7 +48,11 @@ function App() {
       <AccountState>
         <TransactionState>
           <DashboardState>
-            <AppContent />
+            <InvestmentState>
+              <TradeState>
+                <AppContent />
+              </TradeState>
+            </InvestmentState>
           </DashboardState>
         </TransactionState>
       </AccountState>
