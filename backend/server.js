@@ -1,11 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // 載入環境變數
 dotenv.config();
 
 const app = express();
+
+// Enable CORS
+app.use(cors());
 
 // Init Middleware
 app.use(express.json({ extended: false }));
