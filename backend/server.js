@@ -43,7 +43,7 @@ app.use('/api/dashboard', require('./src/routes/dashboard'));
 
 const { scheduleMonthlySnapshot } = require('./src/services/snapshotService');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`伺服器正在 port ${PORT} 上運行`);
