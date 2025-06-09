@@ -1,108 +1,128 @@
-import React, { useState, useContext, useEffect } from 'react';
-import AccountContext from '../../context/account/accountContext';
+import React, { useState, useContext, useEffect } from "react";
+import AccountContext from "../../context/account/accountContext";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
 
-const AccountForm = () => {
+const AccountForm = ({ open, handleClose }) => {
   const accountContext = useContext(AccountContext);
-  const { addAccount, updateAccount, clearCurrent, current, error, clearErrors } = accountContext;
-
-  useEffect(() => {
-    if (error) {
-      alert(error);
-      // clearErrors(); // Assuming you will add clearErrors to AccountContext
-    }
-  }, [error]);
+  const { addAccount, updateAccount, clearCurrent, current } = accountContext;
 
   useEffect(() => {
     if (current !== null) {
       setAccount(current);
     } else {
       setAccount({
-        name: '',
+        name: "",
         initialBalance: 0,
-        type: 'asset'
+        type: "asset",
+        balance: 0,
       });
     }
   }, [accountContext, current]);
 
   const [account, setAccount] = useState({
-    name: '',
+    name: "",
     initialBalance: 0,
-    type: 'asset'
+    type: "asset",
+    balance: 0,
   });
 
   const { name, initialBalance, type } = account;
 
-  const onChange = e =>
+  const onChange = (e) => {
+    const { name, value } = e.target;
     setAccount({
       ...account,
-      [e.target.name]:
-        e.target.name === 'initialBalance' ? parseFloat(e.target.value) || 0 : e.target.value
+      [name]: name === "initialBalance" ? parseFloat(value) : value,
     });
-
-  const onSubmit = e => {
-    e.preventDefault();
-    if (current === null) {
-      addAccount(account);
-    } else {
-      updateAccount(account);
-    }
-    clearAll();
   };
 
-  const clearAll = () => {
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const accountData = {
+      name: account.name,
+      type: account.type,
+      // 如果是編輯，我們傳遞 balance，如果是新增，傳遞 initialBalance
+      balance: current ? account.balance : account.initialBalance,
+    };
+
+    if (current === null) {
+      addAccount({ name, initialBalance, type });
+    } else {
+      updateAccount({ ...account, balance: account.balance });
+    }
+    closeForm();
+  };
+
+  const closeForm = () => {
+    handleClose();
     clearCurrent();
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <h2>{current ? '編輯帳戶' : '新增帳戶'}</h2>
-      <input
-        type="text"
-        placeholder="帳戶名稱"
-        name="name"
-        value={name}
-        onChange={onChange}
-        required
-      />
-      <input
-        type="number"
-        placeholder="初始餘額"
-        name="initialBalance"
-        value={initialBalance}
-        onChange={onChange}
-        required
-      />
-      <h5>帳戶類型</h5>
-      <input
-        type="radio"
-        name="type"
-        value="asset"
-        checked={type === 'asset'}
-        onChange={onChange}
-      /> 資產{' '}
-      <input
-        type="radio"
-        name="type"
-        value="liability"
-        checked={type === 'liability'}
-        onChange={onChange}
-      /> 負債
-      <div>
-        <input
-          type="submit"
-          value={current ? '更新帳戶' : '新增帳戶'}
-          className="btn btn-primary btn-block"
-        />
-      </div>
-      {current && (
-        <div>
-          <button className="btn btn-light btn-block" onClick={clearAll}>
-            清除
-          </button>
-        </div>
-      )}
-    </form>
+    <Dialog open={open} onClose={closeForm}>
+      <DialogTitle>{current ? "編輯帳戶" : "新增帳戶"}</DialogTitle>
+      <form onSubmit={onSubmit}>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="name"
+            label="帳戶名稱"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={name}
+            onChange={onChange}
+            required
+          />
+          <TextField
+            margin="dense"
+            name="initialBalance"
+            label="初始餘額"
+            type="number"
+            fullWidth
+            variant="standard"
+            value={initialBalance}
+            onChange={onChange}
+            required
+          />
+          <FormControl component="fieldset" margin="normal">
+            <FormLabel component="legend">帳戶類型</FormLabel>
+            <RadioGroup row name="type" value={type} onChange={onChange}>
+              <FormControlLabel
+                value="asset"
+                control={<Radio />}
+                label="資產"
+              />
+              <FormControlLabel
+                value="liability"
+                control={<Radio />}
+                label="負債"
+              />
+            </RadioGroup>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeForm}>取消</Button>
+          <Button type="submit" variant="contained">
+            {current ? "更新帳戶" : "新增帳戶"}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 };
 
-export default AccountForm; 
+export default AccountForm;
