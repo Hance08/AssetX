@@ -1,73 +1,227 @@
-import React, { useContext, useEffect } from 'react';
-import DashboardContext from '../context/dashboard/dashboardContext';
-import CategoryPieChart from '../components/dashboard/CategoryPieChart';
-import AssetPieChart from '../components/dashboard/AssetPieChart';
-import NetWorthTrendChart from '../components/dashboard/NetWorthTrendChart';
+import React, { useContext, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CircularProgress,
+} from "@mui/material";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import DashboardContext from "../context/dashboard/dashboardContext";
+import NetWorthTrendChart from "../components/dashboard/NetWorthTrendChart";
+import "./Dashboard.css";
 
 const Dashboard = () => {
   const dashboardContext = useContext(DashboardContext);
-  const { 
-    summary, 
-    monthlyCategorySummary, 
-    assetDistribution, 
+  const {
+    summary,
+    monthlySummary,
+    assetDistribution,
     netWorthGrowth,
-    loading, 
+    loading,
     getDashboardSummary,
-    getMonthlyCategorySummary,
+    getMonthlySummary,
     getAssetDistribution,
-    getNetWorthGrowth
+    getNetWorthGrowth,
   } = dashboardContext;
 
   useEffect(() => {
     getDashboardSummary();
-    // 預設取得本月的分類支出
     const now = new Date();
-    getMonthlyCategorySummary(now.getFullYear(), now.getMonth() + 1);
+    getMonthlySummary(now.getFullYear(), now.getMonth() + 1);
     getAssetDistribution();
     getNetWorthGrowth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#AF19FF",
+    "#FF4560",
+  ];
+
+  const mockInvestmentData = [
+    { name: "台股", value: 250000 },
+    { name: "美股", value: 300000 },
+    { name: "加密貨幣", value: 100000 },
+    { name: "基金", value: 50000 },
+  ];
+
   if (loading && !summary) {
-      return <h2>讀取中...</h2>;
+    return (
+      <div className="loading-container">
+        <CircularProgress />
+      </div>
+    );
   }
 
-  const pageStyle = {
-    display: 'flex',
-    gridTemplateColumns: '1fr 2fr',
-    gap: '2rem'
+  const SummaryCard = ({ title, value, color }) => (
+    <Card sx={{ width: 232, height: 151 }}>
+      <CardContent>
+        <Typography color="text.secondary" gutterBottom>
+          {title}
+        </Typography>
+        <Typography variant="h4" component="div" sx={{ color }}>
+          {value ? value.toLocaleString() : 0}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+
+  const ChartCard = ({ data, dataKey, nameKey }) => {
+    if (!data || data.length === 0) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Typography>沒有資料</Typography>
+        </Box>
+      );
+    }
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey={dataKey}
+            nameKey={nameKey}
+            cx="50%"
+            cy="50%"
+            outerRadius={60}
+            label
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    );
   };
 
   return (
-    <div style={pageStyle}>
-      <h1>儀表板</h1>
-
-      {/* 摘要資訊 */}
-      {summary && (
-        <div style={{ display: 'flex', justifyContent: 'space-around', margin: '2rem 0' }}>
-            <div><h2>總資產</h2><p style={{color: 'green', fontSize: '1.5rem'}}>{summary.totalAssets.toLocaleString()}</p></div>
-            <div><h2>總負債</h2><p style={{color: 'red', fontSize: '1.5rem'}}>{summary.totalLiabilities.toLocaleString()}</p></div>
-            <div><h2>淨值</h2><p style={{color: 'blue', fontSize: '1.5rem'}}>{summary.netWorth.toLocaleString()}</p></div>
-        </div>
-      )}
-
-      {/* TODO: 圖表區塊 */}
-      <div style={{ display: 'flex', justifyContent: 'space-around', margin: '2rem 0' }}>
-          <div>
-            <h3>本月支出分佈</h3>
-            <CategoryPieChart data={monthlyCategorySummary} />
-          </div>
-          <div>
-            <h3>資產分佈</h3>
-            <AssetPieChart data={assetDistribution} />
-          </div>
-      </div>
-       <div>
-            <h3>淨值成長趨勢</h3>
+    <Box sx={{ display: "flex", gap: "40px" }}>
+      {/* Left Column Group */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+        <Box sx={{ display: "flex", gap: "28px" }}>
+          {/* First sub-column */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "28px",
+              height: "270px",
+            }}
+          >
+            <SummaryCard
+              title="總資產"
+              value={summary?.totalAssets || 0}
+              color="green"
+            />
+            <SummaryCard
+              title="總負債"
+              value={summary?.totalLiabilities || 0}
+              color="red"
+            />
+          </Box>
+          {/* Second sub-column */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "28px",
+              height: "270px",
+            }}
+          >
+            <Card sx={{ width: 232, height: 151 }}>
+              <CardContent>
+                <Typography color="text.secondary" gutterBottom>
+                  本月收支
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "flex-start",
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <Box>
+                    <Typography color="text.secondary">收入</Typography>
+                    <Typography variant="h5" sx={{ color: "green" }}>
+                      {monthlySummary?.totalIncome.toLocaleString() || 0}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography color="text.secondary">支出</Typography>
+                    <Typography variant="h5" sx={{ color: "red" }}>
+                      {monthlySummary?.totalExpense.toLocaleString() || 0}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+            <SummaryCard title="淨值" value={summary?.netWorth} color="blue" />
+          </Box>
+        </Box>
+        <Card sx={{ width: 492, height: 358 }}>
+          <CardContent>
+            <Typography variant="h6">淨值成長圖</Typography>
             <NetWorthTrendChart data={netWorthGrowth} />
-        </div>
-    </div>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Right Column Group */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+        <Card sx={{ width: 281, height: 320 }}>
+          <CardContent
+            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Typography variant="h6" align="center">
+              資產分佈
+            </Typography>
+            <Box sx={{ flexGrow: 1, width: "100%", minHeight: 0 }}>
+              <ChartCard
+                data={assetDistribution}
+                dataKey="value"
+                nameKey="name"
+              />
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ width: 281, height: 320 }}>
+          <CardContent
+            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Typography variant="h6" align="center">
+              投資分佈 (模擬)
+            </Typography>
+            <Box sx={{ flexGrow: 1, width: "100%", minHeight: 0 }}>
+              <ChartCard
+                data={mockInvestmentData}
+                dataKey="value"
+                nameKey="name"
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    </Box>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
