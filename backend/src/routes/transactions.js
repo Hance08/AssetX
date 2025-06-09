@@ -9,9 +9,17 @@ const Account = require('../models/Account');
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.user.id })
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 0;
+
+    let query = Transaction.find({ userId: req.user.id })
       .populate('accountId', 'name')
       .sort({ date: -1 });
+
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const transactions = await query;
     res.json(transactions);
   } catch (err) {
     console.error(err.message);

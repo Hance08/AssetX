@@ -10,6 +10,8 @@ import {
     GET_NET_WORTH_GROWTH_SUCCESS,
     GET_NET_WORTH_GROWTH_FAIL,
     SET_DASHBOARD_LOADING,
+    GET_RECENT_TRANSACTIONS_SUCCESS,
+    GET_RECENT_TRANSACTIONS_FAIL,
   } from '../types';
   
   export default (state, action) => {
@@ -49,11 +51,19 @@ import {
             loading: false,
             error: null,
         }
+      case GET_RECENT_TRANSACTIONS_SUCCESS:
+        return {
+          ...state,
+          recentTransactions: action.payload,
+          loading: false,
+          error: null,
+        }
       case GET_DASHBOARD_SUMMARY_FAIL:
       case GET_MONTHLY_SUMMARY_FAIL:
       case GET_MONTHLY_CATEGORY_SUMMARY_FAIL:
       case GET_ASSET_DISTRIBUTION_FAIL:
       case GET_NET_WORTH_GROWTH_FAIL:
+      case GET_RECENT_TRANSACTIONS_FAIL:
         return {
           ...state,
           loading: false,

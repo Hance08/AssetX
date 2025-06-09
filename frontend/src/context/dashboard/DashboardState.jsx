@@ -14,6 +14,8 @@ import {
   GET_NET_WORTH_GROWTH_SUCCESS,
   GET_NET_WORTH_GROWTH_FAIL,
   SET_DASHBOARD_LOADING,
+  GET_RECENT_TRANSACTIONS_SUCCESS,
+  GET_RECENT_TRANSACTIONS_FAIL,
 } from "../types";
 
 const DashboardState = (props) => {
@@ -23,6 +25,7 @@ const DashboardState = (props) => {
     monthlyCategorySummary: [],
     assetDistribution: [],
     netWorthGrowth: [],
+    recentTransactions: [],
     loading: false,
     error: null,
   };
@@ -121,6 +124,23 @@ const DashboardState = (props) => {
     }
   };
 
+  // 取得最近的交易紀錄
+  const getRecentTransactions = async (limit = 5) => {
+    setLoading();
+    try {
+      const res = await axios.get(`/api/transactions?limit=${limit}`);
+      dispatch({
+        type: GET_RECENT_TRANSACTIONS_SUCCESS,
+        payload: res.data,
+      });
+    } catch (err) {
+      dispatch({
+        type: GET_RECENT_TRANSACTIONS_FAIL,
+        payload: err.response.data.msg,
+      });
+    }
+  };
+
   return (
     <DashboardContext.Provider
       value={{
@@ -129,6 +149,7 @@ const DashboardState = (props) => {
         monthlyCategorySummary: state.monthlyCategorySummary,
         assetDistribution: state.assetDistribution,
         netWorthGrowth: state.netWorthGrowth,
+        recentTransactions: state.recentTransactions,
         loading: state.loading,
         error: state.error,
         getDashboardSummary,
@@ -136,6 +157,7 @@ const DashboardState = (props) => {
         getMonthlyCategorySummary,
         getAssetDistribution,
         getNetWorthGrowth,
+        getRecentTransactions,
       }}
     >
       {props.children}
