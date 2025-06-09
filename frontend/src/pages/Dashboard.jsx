@@ -10,7 +10,6 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import DashboardContext from "../context/dashboard/dashboardContext";
 import NetWorthTrendChart from "../components/dashboard/NetWorthTrendChart";
 import RecentTransactions from "../components/dashboard/RecentTransactions";
-import "./Dashboard.css";
 
 const Dashboard = () => {
   const dashboardContext = useContext(DashboardContext);
