@@ -51,6 +51,54 @@ router.get('/summary', auth, async (req, res) => {
   }
 });
 
+// @route   GET api/dashboard/monthly-summary
+// @desc    取得指定月份的總收入與總支出
+// @access  Private
+router.get('/monthly-summary', auth, async (req, res) => {
+    try {
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0, 23, 59, 59);
+
+        const results = await Transaction.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(req.user.id),
+                    date: { $gte: startDate, $lte: endDate },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalIncome: {
+                        $sum: {
+                            $cond: [{ $gt: ['$amount', 0] }, '$amount', 0]
+                        }
+                    },
+                    totalExpense: {
+                        $sum: {
+                            $cond: [{ $lt: ['$amount', 0] }, '$amount', 0]
+                        }
+                    }
+                }
+            }
+        ]);
+        
+        const summary = results[0] || { totalIncome: 0, totalExpense: 0 };
+
+        res.json({
+            totalIncome: summary.totalIncome,
+            totalExpense: Math.abs(summary.totalExpense)
+        });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('伺服器錯誤');
+    }
+});
+
 // @route   GET api/dashboard/monthly-category-summary
 // @desc    取得指定月份的支出分類摘要
 // @access  Private

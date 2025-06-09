@@ -1,6 +1,8 @@
 import {
     GET_DASHBOARD_SUMMARY_SUCCESS,
     GET_DASHBOARD_SUMMARY_FAIL,
+    GET_MONTHLY_SUMMARY_SUCCESS,
+    GET_MONTHLY_SUMMARY_FAIL,
     GET_MONTHLY_CATEGORY_SUMMARY_SUCCESS,
     GET_MONTHLY_CATEGORY_SUMMARY_FAIL,
     GET_ASSET_DISTRIBUTION_SUCCESS,
@@ -19,6 +21,13 @@ import {
           loading: false,
           error: null,
         };
+      case GET_MONTHLY_SUMMARY_SUCCESS:
+        return {
+            ...state,
+            monthlySummary: action.payload,
+            loading: false,
+            error: null,
+        }
       case GET_MONTHLY_CATEGORY_SUMMARY_SUCCESS:
         return {
             ...state,
@@ -41,6 +50,7 @@ import {
             error: null,
         }
       case GET_DASHBOARD_SUMMARY_FAIL:
+      case GET_MONTHLY_SUMMARY_FAIL:
       case GET_MONTHLY_CATEGORY_SUMMARY_FAIL:
       case GET_ASSET_DISTRIBUTION_FAIL:
       case GET_NET_WORTH_GROWTH_FAIL:
