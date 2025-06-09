@@ -1,0 +1,9 @@
+.drawer-permanent {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.drawer-paper {
+  width: 200px;
+  box-sizing: border-box;
+} 
