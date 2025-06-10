@@ -80,10 +80,13 @@ const Transactions = () => {
       <Typography sx={{ flex: 1.5 }} variant="subtitle2">
         日期
       </Typography>
-      <Typography sx={{ flex: 2 }} variant="subtitle2">
+      <Typography sx={{ flex: 1.5 }} variant="subtitle2">
         分類
       </Typography>
-      <Typography sx={{ flex: 2 }} variant="subtitle2">
+      <Typography sx={{ flex: 1.5 }} variant="subtitle2">
+        細項
+      </Typography>
+      <Typography sx={{ flex: 1.5 }} variant="subtitle2">
         帳戶
       </Typography>
       <Typography sx={{ flex: 1, textAlign: "right" }} variant="subtitle2">

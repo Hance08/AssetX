@@ -55,10 +55,10 @@ const TransactionForm = ({ open, handleClose }) => {
         date: new Date().toISOString().slice(0, 10),
         category: "",
         subcategory: "",
-        accountId: "",
+        accountId: accounts && accounts.length > 0 ? accounts[0]._id : "",
       });
     }
-  }, [current, open]);
+  }, [current, open, accounts]);
 
   const [transaction, setTransaction] = useState({
     notes: "",
@@ -119,7 +119,9 @@ const TransactionForm = ({ open, handleClose }) => {
         <form onSubmit={onSubmit}>
           <DialogContent>
             <FormControl fullWidth margin="dense" required>
-              <InputLabel>帳戶</InputLabel>
+              <InputLabel sx={{ bgcolor: "background.paper", px: 1 }}>
+                帳戶
+              </InputLabel>
               <Select name="accountId" value={accountId} onChange={onChange}>
                 {accounts.map((account) => (
                   <MenuItem key={account._id} value={account._id}>
@@ -128,52 +130,53 @@ const TransactionForm = ({ open, handleClose }) => {
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              margin="dense"
-              name="date"
-              label="日期"
-              type="date"
-              fullWidth
-              value={date}
-              onChange={onChange}
-              required
-              InputLabelProps={{ shrink: true }}
-            />
-            <Box mt={2} mb={1}>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                margin="dense"
+                name="date"
+                label="日期"
+                type="date"
+                sx={{ flexGrow: 2 }}
+                value={date}
+                onChange={onChange}
+                required
+                // InputLabelProps={{ shrink: true }}
+              />
+
               <Button
                 variant="outlined"
-                fullWidth
+                sx={{ flexGrow: 1 }}
                 onClick={() => setCategoryDialogOpen(true)}
               >
-                {category && subcategory
-                  ? `${category} > ${subcategory}`
-                  : "選擇分類"}
+                {category && subcategory ? `${subcategory}` : "選擇分類"}
               </Button>
             </Box>
-            <TextField
-              margin="dense"
-              name="amount"
-              label="金額"
-              type="number"
-              fullWidth
-              value={amount}
-              onChange={onChange}
-              required
-            />
-            <FormControl component="fieldset" margin="normal">
-              <RadioGroup row name="type" value={type} onChange={onChange}>
-                <FormControlLabel
-                  value="expense"
-                  control={<Radio />}
-                  label="支出"
-                />
-                <FormControlLabel
-                  value="income"
-                  control={<Radio />}
-                  label="收入"
-                />
-              </RadioGroup>
-            </FormControl>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                margin="dense"
+                name="amount"
+                label="金額"
+                type="number"
+                sx={{ flexGrow: 1 }}
+                value={amount}
+                onChange={onChange}
+                required
+              />
+              <FormControl component="fieldset" margin="dense">
+                <RadioGroup row name="type" value={type} onChange={onChange}>
+                  <FormControlLabel
+                    value="expense"
+                    control={<Radio />}
+                    label="支出"
+                  />
+                  <FormControlLabel
+                    value="income"
+                    control={<Radio />}
+                    label="收入"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Box>
             <TextField
               margin="dense"
               name="notes"

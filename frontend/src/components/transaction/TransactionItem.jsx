@@ -12,7 +12,8 @@ const TransactionItem = ({ transaction, onEdit }) => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { _id, date, notes, amount, accountId, category } = transaction;
+  const { _id, date, notes, amount, accountId, category, subcategory } =
+    transaction;
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -42,10 +43,13 @@ const TransactionItem = ({ transaction, onEdit }) => {
         <Typography sx={{ flex: 1.5 }} variant="body2">
           {moment(date).format("YYYY-MM-DD")}
         </Typography>
-        <Typography sx={{ flex: 2 }} variant="body1">
+        <Typography sx={{ flex: 1.5 }} variant="body1">
           {category}
         </Typography>
-        <Typography sx={{ flex: 2 }} variant="body2" color="text.secondary">
+        <Typography sx={{ flex: 1.5 }} variant="body2" color="text.secondary">
+          {subcategory}
+        </Typography>
+        <Typography sx={{ flex: 1.5 }} variant="body2" color="text.secondary">
           {accountId ? accountId.name : "N/A"}
         </Typography>
         <Typography
