@@ -122,7 +122,7 @@ const CategorySelectionDialog = ({
                           <ListItem
                             key={subcategory}
                             button
-                            sx={{ pl: 4 }}
+                            sx={{ pl: 4, cursor: "pointer" }}
                             onClick={() =>
                               handleSubcategorySelect(category, subcategory)
                             }

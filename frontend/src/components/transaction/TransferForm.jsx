@@ -72,54 +72,66 @@ const TransferForm = ({ open, handleClose }) => {
       <DialogTitle>新增轉帳</DialogTitle>
       <form onSubmit={onSubmit}>
         <DialogContent>
-          <FormControl fullWidth margin="dense" required>
-            <InputLabel>從 帳戶</InputLabel>
-            <Select
-              name="fromAccountId"
-              value={fromAccountId}
-              onChange={onChange}
-            >
-              {accounts.map((account) => (
-                <MenuItem key={account._id} value={account._id}>
-                  {account.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Box textAlign="center" my={1}>
-            <Typography variant="h6">→</Typography>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <FormControl fullWidth margin="dense" required>
+              <InputLabel sx={{ bgcolor: "background.paper", px: 1 }}>
+                從 帳戶
+              </InputLabel>
+              <Select
+                name="fromAccountId"
+                value={fromAccountId}
+                onChange={onChange}
+              >
+                {accounts.map((account) => (
+                  <MenuItem key={account._id} value={account._id}>
+                    {account.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Box textAlign="center" my={1}>
+              <Typography variant="h6">→</Typography>
+            </Box>
+            <FormControl fullWidth margin="dense" required>
+              <InputLabel sx={{ bgcolor: "background.paper", px: 1 }}>
+                至 帳戶
+              </InputLabel>
+              <Select
+                name="toAccountId"
+                value={toAccountId}
+                onChange={onChange}
+              >
+                {accounts.map((account) => (
+                  <MenuItem key={account._id} value={account._id}>
+                    {account.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Box>
-          <FormControl fullWidth margin="dense" required>
-            <InputLabel>至 帳戶</InputLabel>
-            <Select name="toAccountId" value={toAccountId} onChange={onChange}>
-              {accounts.map((account) => (
-                <MenuItem key={account._id} value={account._id}>
-                  {account.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            margin="dense"
-            name="amount"
-            label="金額"
-            type="number"
-            fullWidth
-            value={amount}
-            onChange={onChange}
-            required
-          />
-          <TextField
-            margin="dense"
-            name="date"
-            label="日期"
-            type="date"
-            fullWidth
-            value={date}
-            onChange={onChange}
-            required
-            InputLabelProps={{ shrink: true }}
-          />
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <TextField
+              margin="dense"
+              name="date"
+              label="日期"
+              type="date"
+              fullWidth
+              value={date}
+              onChange={onChange}
+              required
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              margin="dense"
+              name="amount"
+              label="金額"
+              type="number"
+              fullWidth
+              value={amount}
+              onChange={onChange}
+              required
+            />
+          </Box>
           <TextField
             margin="dense"
             name="notes"

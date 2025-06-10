@@ -52,7 +52,16 @@ router.get('/', auth, async (req, res) => {
         userCategories = await Category.find({ userId: req.user.id });
       }
     }
-    
+
+    // Custom sort: "飲食" first, "其他" last
+    userCategories.sort((a, b) => {
+      if (a.name === "飲食") return -1;
+      if (b.name === "飲食") return 1;
+      if (a.name === "其他") return 1;
+      if (b.name === "其他") return -1;
+      return 0;
+    });
+
     res.json(userCategories);
   } catch (err) {
     console.error(err.message);
