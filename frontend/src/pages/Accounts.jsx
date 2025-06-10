@@ -95,7 +95,7 @@ const Accounts = () => {
         ) : accounts && accounts.length > 0 ? (
           <>
             {listHeader}
-            <Box sx={{ maxHeight: 330, overflow: "auto" }}>
+            <Box sx={{ maxHeight: 500, overflow: "auto" }}>
               <List disablePadding>
                 {accounts.map((account) => (
                   <AccountItem
