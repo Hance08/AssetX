@@ -5,17 +5,17 @@ const Category = require('../models/Category');
 
 // Define default categories directly in the backend route
 const defaultCategories = [
-    { name: "飲食", icon: "Restaurant", subcategories: ["早餐", "午餐", "晚餐", "飲料", "零食", "食材", "其他"] },
-    { name: "交通", icon: "Commute", subcategories: ["捷運", "公車", "計程車", "火車", "高鐵", "油錢", "停車費", "其他"] },
-    { name: "娛樂", icon: "SportsEsports", subcategories: ["電影", "遊戲", "KTV", "展覽", "運動", "旅遊", "其他"] },
-    { name: "購物", icon: "ShoppingCart", subcategories: ["服飾", "電子產品", "書籍", "美妝保養", "家具", "其他"] },
-    { name: "個人", icon: "Person", subcategories: ["理髮", "學習", "社交", "寵物", "其他"] },
-    { name: "醫療", icon: "MedicalServices", subcategories: ["看診", "藥品", "保健食品", "其他"] },
-    { name: "家居", icon: "Home", subcategories: ["房租", "水電瓦斯", "網路費", "日用品", "維修", "其他"] },
-    { name: "生活", icon: "ReceiptLong", subcategories: ["電話費", "慈善", "紅白包", "其他"] },
-    { name: "手續費", icon: "Payment", subcategories: ["銀行手續費", "交易手續費", "其他"] },
+    { name: "飲食", icon: "Restaurant", subcategories: ["早餐", "午餐", "晚餐", "飲料", "零食", "食材"] },
+    { name: "交通", icon: "Commute", subcategories: ["捷運", "公車", "計程車", "火車", "高鐵", "油錢", "停車費"] },
+    { name: "娛樂", icon: "SportsEsports", subcategories: ["電影", "遊戲", "KTV", "展覽", "運動", "旅遊"] },
+    { name: "購物", icon: "ShoppingCart", subcategories: ["服飾", "電子產品", "書籍", "美妝保養", "家具"] },
+    { name: "個人", icon: "Person", subcategories: ["理髮", "學習", "社交", "寵物"] },
+    { name: "醫療", icon: "MedicalServices", subcategories: ["看診", "藥品", "保健食品"] },
+    { name: "家居", icon: "Home", subcategories: ["房租", "水電瓦斯", "網路費", "日用品", "維修"] },
+    { name: "生活", icon: "ReceiptLong", subcategories: ["電話費", "慈善", "紅白包"] },
+    { name: "手續費", icon: "Payment", subcategories: ["銀行手續費", "交易手續費"] },
     { name: "其他", icon: "HelpOutline", subcategories: ["雜項"] },
-    { name: "收入", icon: "AttachMoney", subcategories: ["薪資", "獎金", "投資收入", "兼職", "其他"] },
+    { name: "收入", icon: "AttachMoney", subcategories: ["薪資", "獎金", "投資收入", "兼職"] },
 ];
 
 // @route   GET api/categories

@@ -198,6 +198,7 @@ const TransactionForm = ({ open, handleClose }) => {
         open={isCategoryDialogOpen}
         onClose={() => setCategoryDialogOpen(false)}
         onSelect={handleCategorySelect}
+        transactionType={type}
       />
     </>
   );

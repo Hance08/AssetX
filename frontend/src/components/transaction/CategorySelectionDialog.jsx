@@ -18,7 +18,12 @@ import {
 import { ExpandLess, ExpandMore, Add as AddIcon } from "@mui/icons-material";
 import { getIconComponent } from "../../utils/iconMapping";
 
-const CategorySelectionDialog = ({ open, onClose, onSelect }) => {
+const CategorySelectionDialog = ({
+  open,
+  onClose,
+  onSelect,
+  transactionType,
+}) => {
   const categoryContext = useContext(CategoryContext);
   const { categories, loading, getCategories, addCategory, addSubcategory } =
     categoryContext;
@@ -28,12 +33,25 @@ const CategorySelectionDialog = ({ open, onClose, onSelect }) => {
   const [newSubcategory, setNewSubcategory] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState([]);
 
   useEffect(() => {
     if (open) {
       getCategories();
     }
-  }, [open]);
+  }, [open, getCategories]);
+
+  useEffect(() => {
+    if (categories) {
+      const filtered = categories.filter((category) => {
+        if (transactionType === "income") {
+          return category.name === "收入";
+        }
+        return category.name !== "收入";
+      });
+      setFilteredCategories(filtered);
+    }
+  }, [categories, transactionType]);
 
   const handleCategoryClick = (categoryName) => {
     setOpenCategory(openCategory === categoryName ? null : categoryName);
@@ -69,7 +87,7 @@ const CategorySelectionDialog = ({ open, onClose, onSelect }) => {
           </Box>
         ) : (
           <List component="nav">
-            {categories
+            {filteredCategories
               .filter((cat) => cat.name !== "帳戶轉帳")
               .map((category) => {
                 const IconComponent = getIconComponent(category.icon);
@@ -84,12 +102,6 @@ const CategorySelectionDialog = ({ open, onClose, onSelect }) => {
                         onClick={() => handleCategoryClick(category.name)}
                         sx={{ cursor: "pointer" }}
                       />
-                      <IconButton
-                        size="small"
-                        onClick={() => setAddingSubcategory(category._id)}
-                      >
-                        <AddIcon fontSize="small" />
-                      </IconButton>
                       <IconButton
                         onClick={() => handleCategoryClick(category.name)}
                       >
@@ -118,28 +130,50 @@ const CategorySelectionDialog = ({ open, onClose, onSelect }) => {
                             <ListItemText primary={subcategory} />
                           </ListItem>
                         ))}
-                        {addingSubcategory === category._id && (
-                          <ListItem sx={{ pl: 4 }}>
-                            <TextField
-                              autoFocus
-                              size="small"
-                              label="新細項"
-                              value={newSubcategory}
-                              onChange={(e) =>
-                                setNewSubcategory(e.target.value)
-                              }
-                              onKeyDown={(e) =>
-                                e.key === "Enter" &&
-                                handleAddSubcategory(category._id)
-                              }
-                            />
-                            <Button
-                              onClick={() => handleAddSubcategory(category._id)}
+                        <ListItem sx={{ pl: 4, pt: 1 }}>
+                          {addingSubcategory === category._id ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
                             >
-                              新增
+                              <TextField
+                                autoFocus
+                                size="small"
+                                label="新細項"
+                                value={newSubcategory}
+                                onChange={(e) =>
+                                  setNewSubcategory(e.target.value)
+                                }
+                                onKeyDown={(e) =>
+                                  e.key === "Enter" &&
+                                  handleAddSubcategory(category._id)
+                                }
+                              />
+                              <Button
+                                onClick={() =>
+                                  handleAddSubcategory(category._id)
+                                }
+                              >
+                                新增
+                              </Button>
+                              <Button
+                                onClick={() => setAddingSubcategory(null)}
+                              >
+                                取消
+                              </Button>
+                            </Box>
+                          ) : (
+                            <Button
+                              startIcon={<AddIcon />}
+                              onClick={() => setAddingSubcategory(category._id)}
+                            >
+                              新增項目
                             </Button>
-                          </ListItem>
-                        )}
+                          )}
+                        </ListItem>
                       </List>
                     </Collapse>
                   </React.Fragment>
