@@ -16,6 +16,9 @@ const transactionSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  subcategory: {
+    type: String,
+  },
   accountId: {
     type: Schema.Types.ObjectId,
     ref: 'Account',

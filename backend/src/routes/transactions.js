@@ -46,7 +46,7 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   // 新的 API 接收 type 和一個正數的 amount
-  const { date, amount, category, accountId, notes, type } = req.body;
+  const { date, amount, category, subcategory, accountId, notes, type } = req.body;
 
   try {
     // 驗證 amount 必須是正數
@@ -69,6 +69,7 @@ router.post('/', auth, async (req, res) => {
       date: date || new Date(), // 如果前端沒提供 date，就使用當下時間
       amount: finalAmount,
       category,
+      subcategory,
       accountId,
       notes,
     });
@@ -158,7 +159,7 @@ router.post('/transfer', auth, async (req, res) => {
 // @desc    更新一筆交易紀錄
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
-  const { date, amount, category, accountId, notes, type } = req.body;
+  const { date, amount, category, subcategory, accountId, notes, type } = req.body;
 
   try {
     let transaction = await Transaction.findById(req.params.id);
@@ -182,7 +183,7 @@ router.put('/:id', auth, async (req, res) => {
     }
     
     // 建立更新物件
-    const transactionFields = { date, amount: newAmount, category, accountId, notes };
+    const transactionFields = { date, amount: newAmount, category, subcategory, accountId, notes };
 
     let updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
