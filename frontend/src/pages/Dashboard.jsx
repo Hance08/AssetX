@@ -24,16 +24,19 @@ const Dashboard = () => {
     getAssetDistribution,
     getNetWorthGrowth,
     recentTransactions,
-    getRecentTransactions,
+    getDashboardTransactions,
   } = dashboardContext;
 
   useEffect(() => {
-    getDashboardSummary();
     const now = new Date();
-    getMonthlySummary(now.getFullYear(), now.getMonth() + 1);
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    getDashboardSummary();
+    getMonthlySummary(year, month);
     getAssetDistribution();
     getNetWorthGrowth();
-    getRecentTransactions(7);
+    getDashboardTransactions({ year, month });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
