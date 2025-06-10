@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
 import Investments from "./pages/Investments";
+import InvestmentDetail from "./pages/InvestmentDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AuthContext from "./context/AuthContext";
@@ -94,6 +95,14 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 <Investments />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/investment/:investmentId"
+            element={
+              <PrivateRoute>
+                <InvestmentDetail />
               </PrivateRoute>
             }
           />

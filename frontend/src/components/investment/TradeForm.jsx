@@ -1,100 +1,153 @@
-import React, { useState, useContext, useEffect } from 'react';
-import InvestmentContext from '../../context/investment/investmentContext';
-import TradeContext from '../../context/trade/tradeContext';
+import React, { useState, useContext, useEffect } from "react";
+import TradeContext from "../../context/trade/tradeContext";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+} from "@mui/material";
 
-const TradeForm = ({ setShowForm }) => {
-    const investmentContext = useContext(InvestmentContext);
-    const tradeContext = useContext(TradeContext);
+const TradeForm = ({ open, onClose, investmentId }) => {
+  const tradeContext = useContext(TradeContext);
+  const { addTrade, updateTrade, clearCurrentTrade, currentTrade } =
+    tradeContext;
 
-    const { current: currentInvestment } = investmentContext;
-    const { addTrade, updateTrade, clearCurrentTrade, currentTrade } = tradeContext;
+  const [trade, setTrade] = useState({
+    date: new Date().toISOString().slice(0, 10),
+    type: "buy",
+    shares: "",
+    price: "",
+    fee: "",
+  });
 
-    const [trade, setTrade] = useState({
+  useEffect(() => {
+    if (currentTrade) {
+      const formattedDate = new Date(currentTrade.date)
+        .toISOString()
+        .slice(0, 10);
+      setTrade({ ...currentTrade, date: formattedDate });
+    } else {
+      setTrade({
         date: new Date().toISOString().slice(0, 10),
-        type: 'buy',
-        shares: '',
-        price: '',
-        fee: ''
-    });
+        type: "buy",
+        shares: "",
+        price: "",
+        fee: "0",
+      });
+    }
+  }, [currentTrade, open]);
 
-    useEffect(() => {
-        if (currentTrade) {
-            // 如果是編輯模式，格式化日期以符合 <input type="date">
-            const formattedDate = new Date(currentTrade.date).toISOString().slice(0, 10);
-            setTrade({ ...currentTrade, date: formattedDate });
-        } else {
-            // 新增模式的預設值
-            setTrade({
-                date: new Date().toISOString().slice(0, 10),
-                type: 'buy',
-                shares: '',
-                price: '',
-                fee: ''
-            });
-        }
-    }, [currentTrade]);
+  const { date, type, shares, price, fee } = trade;
 
-    const { date, type, shares, price, fee } = trade;
+  const onChange = (e) =>
+    setTrade({ ...trade, [e.target.name]: e.target.value });
 
-    const onChange = e => setTrade({ ...trade, [e.target.name]: e.target.value });
+  const handleClose = () => {
+    clearCurrentTrade();
+    onClose();
+  };
 
-    const onSubmit = e => {
-        e.preventDefault();
-        const tradeData = { ...trade, investmentId: currentInvestment._id };
-        
-        if (currentTrade === null) {
-            addTrade(tradeData);
-        } else {
-            updateTrade({ ...tradeData, _id: currentTrade._id });
-        }
-        closeForm();
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const tradeData = {
+      ...trade,
+      investmentId: investmentId, // Use prop directly
+      shares: parseFloat(shares),
+      price: parseFloat(price),
+      fee: parseFloat(fee) || 0,
     };
 
-    const closeForm = () => {
-        clearCurrentTrade();
-        if (setShowForm) {
-            setShowForm(false);
-        }
-    };
+    if (currentTrade === null) {
+      addTrade(tradeData);
+    } else {
+      updateTrade({ ...tradeData, _id: currentTrade._id });
+    }
+    handleClose();
+  };
 
-    return (
-        <div style={{border: '1px solid #ccc', padding: '1rem', marginTop: '1rem', marginBottom: '1rem'}}>
-            <form onSubmit={onSubmit}>
-                <h4 className="text-primary">{currentTrade ? '編輯交易紀錄' : '新增交易紀錄'}</h4>
-                <div className="form-group">
-                    <label htmlFor="date">日期</label>
-                    <input type="date" name="date" value={date} onChange={onChange} required />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="type">類型</label>
-                    <select name="type" value={type} onChange={onChange} required>
-                        <option value="buy">買入</option>
-                        <option value="sell">賣出</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="shares">股數</label>
-                    <input type="number" placeholder="股數" name="shares" value={shares} onChange={onChange} required />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="price">價格</label>
-                    <input type="number" step="0.01" placeholder="每股價格" name="price" value={price} onChange={onChange} required />
-                </div>
-                 <div className="form-group">
-                    <label htmlFor="fee">手續費</label>
-                    <input type="number" placeholder="手續費" name="fee" value={fee} onChange={onChange} />
-                </div>
-                <input
-                    type="submit"
-                    value={currentTrade ? '更新交易' : '新增交易'}
-                    className="btn btn-primary btn-sm"
-                />
-                <button className="btn btn-light btn-sm" onClick={closeForm}>
-                    取消
-                </button>
-            </form>
-        </div>
-    );
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        {currentTrade ? "編輯交易紀錄" : "新增交易紀錄"}
+      </DialogTitle>
+      <DialogContent>
+        <Box
+          component="form"
+          id="trade-form"
+          onSubmit={onSubmit}
+          sx={{ mt: 2 }}
+        >
+          <TextField
+            margin="dense"
+            label="日期"
+            type="date"
+            fullWidth
+            variant="outlined"
+            name="date"
+            value={date}
+            onChange={onChange}
+            InputLabelProps={{ shrink: true }}
+            required
+          />
+          <FormControl fullWidth margin="dense" required>
+            <InputLabel>類型</InputLabel>
+            <Select name="type" value={type} onChange={onChange} label="類型">
+              <MenuItem value="buy">買入</MenuItem>
+              <MenuItem value="sell">賣出</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="股數"
+            type="number"
+            fullWidth
+            variant="outlined"
+            name="shares"
+            value={shares}
+            onChange={onChange}
+            required
+            inputProps={{ step: "any" }}
+          />
+          <TextField
+            margin="dense"
+            label="每股價格"
+            type="number"
+            fullWidth
+            variant="outlined"
+            name="price"
+            value={price}
+            onChange={onChange}
+            required
+            inputProps={{ step: "0.01" }}
+          />
+          <TextField
+            margin="dense"
+            label="手續費"
+            type="number"
+            fullWidth
+            variant="outlined"
+            name="fee"
+            value={fee}
+            onChange={onChange}
+            inputProps={{ step: "0.01" }}
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>取消</Button>
+        <Button type="submit" form="trade-form" variant="contained">
+          {currentTrade ? "更新交易" : "新增交易"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
-export default TradeForm; 
+export default TradeForm;
