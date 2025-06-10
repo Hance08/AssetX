@@ -22,6 +22,7 @@ import TransactionState from "./context/transaction/TransactionState.jsx";
 import DashboardState from "./context/dashboard/DashboardState.jsx";
 import InvestmentState from "./context/investment/InvestmentState.jsx";
 import TradeState from "./context/trade/TradeState";
+import CategoryState from "./context/category/CategoryState";
 import AccountContext from "./context/account/accountContext";
 import TransactionContext from "./context/transaction/transactionContext";
 import "./App.css";
@@ -122,7 +123,9 @@ function App() {
           <DashboardState>
             <InvestmentState>
               <TradeState>
-                <AppContent />
+                <CategoryState>
+                  <AppContent />
+                </CategoryState>
               </TradeState>
             </InvestmentState>
           </DashboardState>

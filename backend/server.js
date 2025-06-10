@@ -40,6 +40,7 @@ app.use('/api/investments', require('./src/routes/investments'));
 app.use('/api/trades', require('./src/routes/investmentTrades'));
 app.use('/api/dividends', require('./src/routes/dividends'));
 app.use('/api/dashboard', require('./src/routes/dashboard'));
+app.use('/api/categories', require('./src/routes/categories'));
 
 const { scheduleMonthlySnapshot } = require('./src/services/snapshotService');
 
