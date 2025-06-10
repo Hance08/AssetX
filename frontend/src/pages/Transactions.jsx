@@ -26,6 +26,7 @@ const Transactions = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [processedTransactions, setProcessedTransactions] = useState([]);
 
   useEffect(() => {
     const year = selectedDate.getFullYear();
@@ -33,6 +34,47 @@ const Transactions = () => {
     getTransactions({ year, month });
     // eslint-disable-next-line
   }, [selectedDate]);
+
+  useEffect(() => {
+    if (transactions) {
+      const processed = [];
+      const handledTransferIds = new Set();
+
+      for (const transaction of transactions) {
+        if (
+          transaction.transferId &&
+          !handledTransferIds.has(transaction.transferId)
+        ) {
+          const pair = transactions.find(
+            (t) =>
+              t.transferId === transaction.transferId &&
+              t._id !== transaction._id
+          );
+          if (pair) {
+            const from = transaction.amount < 0 ? transaction : pair;
+            const to = transaction.amount > 0 ? transaction : pair;
+            processed.push({
+              _id: from._id, // Use one of the ids as key
+              isTransfer: true,
+              date: from.date,
+              amount: Math.abs(from.amount),
+              fromAccount: from.accountId.name,
+              toAccount: to.accountId.name,
+              notes: from.notes || to.notes,
+              transferId: from.transferId,
+            });
+            handledTransferIds.add(transaction.transferId);
+          } else {
+            // If pair is not found (e.g., in another month), show as normal
+            processed.push(transaction);
+          }
+        } else if (!transaction.transferId) {
+          processed.push(transaction);
+        }
+      }
+      setProcessedTransactions(processed);
+    }
+  }, [transactions]);
 
   const handleOpenForm = () => {
     clearCurrent();
@@ -83,7 +125,7 @@ const Transactions = () => {
       <Typography sx={{ flex: 1.5 }} variant="subtitle2">
         分類
       </Typography>
-      <Typography sx={{ flex: 1.5 }} variant="subtitle2">
+      <Typography sx={{ flex: 1 }} variant="subtitle2">
         細項
       </Typography>
       <Typography sx={{ flex: 1.5 }} variant="subtitle2">
@@ -172,12 +214,12 @@ const Transactions = () => {
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
             <CircularProgress />
           </Box>
-        ) : transactions && transactions.length > 0 ? (
+        ) : processedTransactions && processedTransactions.length > 0 ? (
           <>
             {listHeader}
             <Box sx={{ maxHeight: "calc(100vh - 280px)", overflow: "auto" }}>
               <List disablePadding>
-                {transactions.map((transaction) => (
+                {processedTransactions.map((transaction) => (
                   <TransactionItem
                     key={transaction._id}
                     transaction={transaction}
