@@ -4,7 +4,9 @@ import {
     DELETE_TRANSACTION,
     UPDATE_TRANSACTION,
     TRANSACTION_ERROR,
-    CLEAR_TRANSACTIONS
+    CLEAR_TRANSACTIONS,
+    SET_CURRENT_TRANSACTION,
+    CLEAR_CURRENT_TRANSACTION,
 } from './types';
 
 const transactionReducer = (state, action) => {
@@ -36,6 +38,16 @@ const transactionReducer = (state, action) => {
                     transaction => transaction._id !== action.payload
                 ),
                 loading: false
+            };
+        case SET_CURRENT_TRANSACTION:
+            return {
+                ...state,
+                current: action.payload
+            };
+        case CLEAR_CURRENT_TRANSACTION:
+            return {
+                ...state,
+                current: null
             };
         case CLEAR_TRANSACTIONS:
             return {
