@@ -6,14 +6,14 @@ import AccountContext from "../account/accountContext"; // 引入 AccountContext
 import {
   GET_TRANSACTIONS,
   ADD_TRANSACTION,
-  DELETE_TRANSACTION,
   UPDATE_TRANSACTION,
   TRANSACTION_ERROR,
   CLEAR_TRANSACTIONS,
-  SET_CURRENT_TRANSACTION,
-  CLEAR_CURRENT_TRANSACTION,
+  SET_CURRENT,
+  CLEAR_CURRENT,
   DELETE_TRANSACTION_SUCCESS,
   DELETE_TRANSACTION_FAIL,
+  SET_LOADING,
 } from "./types";
 
 const TransactionState = (props) => {
@@ -118,12 +118,12 @@ const TransactionState = (props) => {
 
   // Set Current Transaction
   const setCurrent = (transaction) => {
-    dispatch({ type: SET_CURRENT_TRANSACTION, payload: transaction });
+    dispatch({ type: SET_CURRENT, payload: transaction });
   };
 
   // Clear Current Transaction
   const clearCurrent = () => {
-    dispatch({ type: CLEAR_CURRENT_TRANSACTION });
+    dispatch({ type: CLEAR_CURRENT });
   };
 
   // Transfer Funds
@@ -151,6 +151,10 @@ const TransactionState = (props) => {
     dispatch({ type: CLEAR_TRANSACTIONS });
   };
 
+  const setLoading = () => {
+    dispatch({ type: SET_LOADING });
+  };
+
   return (
     <TransactionContext.Provider
       value={{
@@ -166,6 +170,7 @@ const TransactionState = (props) => {
         setCurrent,
         clearCurrent,
         transferFunds,
+        setLoading,
       }}
     >
       {props.children}
