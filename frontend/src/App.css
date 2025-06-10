@@ -4,6 +4,7 @@
 
 .main-content {
   flex-grow: 1;
+  margin-top: 0;
   padding: 24px;
-  min-width: 0; /* Prevents flex items from overflowing */
+  min-width: 0; 
 }
