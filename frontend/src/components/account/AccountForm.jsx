@@ -90,7 +90,7 @@ const AccountForm = ({ open, handleClose }) => {
           <TextField
             margin="dense"
             name="initialBalance"
-            label="初始餘額"
+            label="調整餘額"
             type="number"
             fullWidth
             variant="standard"

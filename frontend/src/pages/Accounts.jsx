@@ -67,7 +67,7 @@ const Accounts = () => {
   );
 
   return (
-    <Container sx={{ width: "900px", alignSelf: "flex-start" }}>
+    <Container sx={{ width: "1200px", height: "80vh" }}>
       <Box
         sx={{
           my: 2,
