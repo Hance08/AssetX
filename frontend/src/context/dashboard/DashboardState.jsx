@@ -124,19 +124,15 @@ const DashboardState = (props) => {
     }
   };
 
-  // 取得最近的交易紀錄
-  const getRecentTransactions = async (limit = 5) => {
-    setLoading();
+  const getDashboardTransactions = async (params = {}) => {
     try {
-      const res = await axios.get(`/api/transactions?limit=${limit}`);
-      dispatch({
-        type: GET_RECENT_TRANSACTIONS_SUCCESS,
-        payload: res.data,
-      });
+      dispatch({ type: SET_DASHBOARD_LOADING });
+      const res = await axios.get("/api/transactions", { params });
+      dispatch({ type: GET_RECENT_TRANSACTIONS_SUCCESS, payload: res.data });
     } catch (err) {
       dispatch({
         type: GET_RECENT_TRANSACTIONS_FAIL,
-        payload: err.response.data.msg,
+        payload: err.response?.data?.msg || "伺服器錯誤",
       });
     }
   };
@@ -157,7 +153,7 @@ const DashboardState = (props) => {
         getMonthlyCategorySummary,
         getAssetDistribution,
         getNetWorthGrowth,
-        getRecentTransactions,
+        getDashboardTransactions,
       }}
     >
       {props.children}

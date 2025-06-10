@@ -10,14 +10,27 @@ const mongoose = require('mongoose');
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 0;
+    const { limit, year, month } = req.query;
 
-    let query = Transaction.find({ userId: req.user.id })
+    const findQuery = { userId: req.user.id };
+
+    if (year && month) {
+      const yearNum = parseInt(year, 10);
+      const monthNum = parseInt(month, 10);
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+      findQuery.date = { $gte: startDate, $lte: endDate };
+    }
+
+    let query = Transaction.find(findQuery)
       .populate('accountId', 'name')
       .sort({ date: -1 });
 
-    if (limit > 0) {
-      query = query.limit(limit);
+    if (limit) {
+      const limitNum = parseInt(limit, 10);
+      if (limitNum > 0) {
+        query = query.limit(limitNum);
+      }
     }
 
     const transactions = await query;
