@@ -1,41 +1,98 @@
-import React, { useContext } from 'react';
-import TransactionContext from '../../context/transaction/transactionContext';
+import React, { useContext, useState } from "react";
+import TransactionContext from "../../context/transaction/transactionContext";
+import { ListItem, IconButton, Typography, Box } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ConfirmDialog from "../common/ConfirmDialog";
+import moment from "moment";
 
-const TransactionItem = ({ transaction }) => {
-    const transactionContext = useContext(TransactionContext);
-    const { deleteTransaction } = transactionContext;
+const TransactionItem = ({ transaction, onEdit }) => {
+  const transactionContext = useContext(TransactionContext);
+  const { deleteTransaction, setCurrent, clearCurrent } = transactionContext;
 
-    const { _id, date, notes, amount, accountId, category } = transaction;
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-    const onDelete = () => {
-        deleteTransaction(_id);
-    };
-    
-    // 簡單的日期格式化
-    const formattedDate = new Date(date).toLocaleDateString('zh-TW');
+  const { _id, date, notes, amount, accountId, category } = transaction;
 
-    // 根據 amount 的正負來決定是否為支出
-    const isExpense = amount < 0;
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
 
-    const amountStyle = {
-        color: isExpense ? 'red' : 'green'
-    };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
-    return (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', margin: '1rem 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div>
-                    <h4>{category}</h4>
-                    <small>帳戶: {accountId ? accountId.name : 'N/A'} | 備註: {notes}</small> <br/>
-                    <small>日期: {formattedDate}</small>
-                </div>
-                <div style={amountStyle}>
-                    <h3>{isExpense ? '' : '+'} {amount.toLocaleString()}</h3>
-                </div>
-            </div>
-            <button className="btn btn-danger btn-sm" onClick={onDelete}>刪除</button>
-        </div>
-    );
+  const onDeleteConfirm = () => {
+    deleteTransaction(_id);
+    clearCurrent();
+    handleCloseDialog();
+  };
+
+  const handleEdit = () => {
+    setCurrent(transaction);
+    onEdit();
+  };
+
+  const isExpense = amount < 0;
+  const amountColor = isExpense ? "error.main" : "success.main";
+
+  return (
+    <>
+      <ListItem divider sx={{ display: "flex", px: 2, py: 1.5, gap: 2 }}>
+        <Typography sx={{ flex: 1.5 }} variant="body2">
+          {moment(date).format("YYYY-MM-DD")}
+        </Typography>
+        <Typography sx={{ flex: 2 }} variant="body1">
+          {category}
+        </Typography>
+        <Typography sx={{ flex: 2 }} variant="body2" color="text.secondary">
+          {accountId ? accountId.name : "N/A"}
+        </Typography>
+        <Typography
+          sx={{
+            flex: 1,
+            textAlign: "right",
+            fontWeight: "bold",
+            color: amountColor,
+          }}
+        >
+          {amount.toLocaleString()}
+        </Typography>
+        <Typography
+          sx={{ flex: 3, wordBreak: "break-word", textAlign: "center" }}
+          variant="body2"
+          color="text.secondary"
+        >
+          {notes}
+        </Typography>
+        <Box sx={{ flex: 1.5, textAlign: "center" }}>
+          <IconButton
+            edge="end"
+            aria-label="edit"
+            onClick={handleEdit}
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            edge="end"
+            aria-label="delete"
+            onClick={handleOpenDialog}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </ListItem>
+      <ConfirmDialog
+        open={dialogOpen}
+        handleClose={handleCloseDialog}
+        handleConfirm={onDeleteConfirm}
+        title="確認刪除"
+        message={`您確定要刪除這筆交易紀錄嗎？此操作會影響帳戶餘額。`}
+      />
+    </>
+  );
 };
 
-export default TransactionItem; 
+export default TransactionItem;
