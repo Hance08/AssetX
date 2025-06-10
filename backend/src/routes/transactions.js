@@ -155,6 +155,44 @@ router.post('/transfer', auth, async (req, res) => {
   }
 });
 
+// @route   DELETE api/transactions/transfer/:transferId
+// @desc    刪除一整筆轉帳（兩筆交易）
+// @access  Private
+router.delete('/transfer/:transferId', auth, async (req, res) => {
+  try {
+    const { transferId } = req.params;
+
+    // 找到所有與此 transferId 相關的交易
+    const transactions = await Transaction.find({ transferId, userId: req.user.id });
+
+    if (!transactions || transactions.length === 0) {
+      return res.status(404).json({ msg: '找不到該轉帳紀錄' });
+    }
+
+    // 更新相關帳戶的餘額
+    const accountUpdates = transactions.map(t => {
+      return {
+        updateOne: {
+          filter: { _id: t.accountId },
+          update: { $inc: { balance: -t.amount } }
+        }
+      };
+    });
+    
+    if (accountUpdates.length > 0) {
+      await Account.bulkWrite(accountUpdates);
+    }
+    
+    // 刪除所有相關交易
+    await Transaction.deleteMany({ transferId, userId: req.user.id });
+
+    res.json({ msg: '轉帳紀錄已刪除' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('伺服器錯誤');
+  }
+});
+
 // @route   PUT api/transactions/:id
 // @desc    更新一筆交易紀錄
 // @access  Private

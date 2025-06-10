@@ -12,6 +12,8 @@ import {
   CLEAR_TRANSACTIONS,
   SET_CURRENT_TRANSACTION,
   CLEAR_CURRENT_TRANSACTION,
+  DELETE_TRANSACTION_SUCCESS,
+  DELETE_TRANSACTION_FAIL,
 } from "./types";
 
 const TransactionState = (props) => {
@@ -67,19 +69,23 @@ const TransactionState = (props) => {
   };
 
   // Delete Transaction
-  const deleteTransaction = async (id) => {
+  const deleteTransaction = async (id, transferId) => {
     try {
-      await axios.delete(`/api/transactions/${id}`);
+      // If transferId is present, we tell the backend to delete both transfer records
+      const url = transferId
+        ? `/api/transactions/transfer/${transferId}`
+        : `/api/transactions/${id}`;
+      await axios.delete(url);
+
       dispatch({
-        type: DELETE_TRANSACTION,
-        payload: id,
+        type: DELETE_TRANSACTION_SUCCESS,
+        payload: transferId || id, // Send transferId or id to reducer
+        isTransfer: !!transferId, // Flag to indicate if it was a transfer
       });
-      // 刪除成功後，更新帳戶餘額
-      getAccounts();
     } catch (err) {
       dispatch({
-        type: TRANSACTION_ERROR,
-        payload: err.response.data,
+        type: DELETE_TRANSACTION_FAIL,
+        payload: err.response?.data?.msg || "Server Error",
       });
     }
   };
