@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import TransactionContext from "../context/transaction/transactionContext";
 import TransactionForm from "../components/transaction/TransactionForm";
+import TransferForm from "../components/transaction/TransferForm";
 import TransactionItem from "../components/transaction/TransactionItem";
 import {
   Container,
@@ -12,30 +13,40 @@ import {
   Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 
 const Transactions = () => {
   const transactionContext = useContext(TransactionContext);
   const { transactions, getTransactions, loading, clearCurrent } =
     transactionContext;
 
-  const [open, setOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
 
   useEffect(() => {
     getTransactions();
     // eslint-disable-next-line
   }, []);
 
-  const handleOpen = () => {
+  const handleOpenForm = () => {
     clearCurrent();
-    setOpen(true);
+    setFormOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseForm = () => {
+    setFormOpen(false);
+  };
+
+  const handleOpenTransfer = () => {
+    setTransferOpen(true);
+  };
+
+  const handleCloseTransfer = () => {
+    setTransferOpen(false);
   };
 
   const handleEdit = () => {
-    setOpen(true);
+    setFormOpen(true);
   };
 
   const listHeader = (
@@ -81,16 +92,26 @@ const Transactions = () => {
           alignItems: "center",
         }}
       >
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpen}
-        >
-          新增交易
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            startIcon={<AddIcon />}
+            variant="contained"
+            onClick={handleOpenForm}
+          >
+            新增交易
+          </Button>
+          <Button
+            startIcon={<CompareArrowsIcon />}
+            variant="contained"
+            onClick={handleOpenTransfer}
+          >
+            新增轉帳
+          </Button>
+        </Box>
       </Box>
 
-      <TransactionForm open={open} handleClose={handleClose} />
+      <TransactionForm open={formOpen} handleClose={handleCloseForm} />
+      <TransferForm open={transferOpen} handleClose={handleCloseTransfer} />
 
       <Paper>
         {loading ? (

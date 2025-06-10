@@ -67,6 +67,7 @@ router.get('/monthly-summary', auth, async (req, res) => {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user.id),
                     date: { $gte: startDate, $lte: endDate },
+                    category: { $ne: '帳戶轉帳' }
                 },
             },
             {
