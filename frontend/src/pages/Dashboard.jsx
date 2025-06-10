@@ -6,10 +6,17 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import DashboardContext from "../context/dashboard/dashboardContext";
 import NetWorthTrendChart from "../components/dashboard/NetWorthTrendChart";
-import RecentTransactions from "../components/dashboard/RecentTransactions";
+import MonthlyBarChart from "../components/dashboard/MonthlyBarChart";
 
 const Dashboard = () => {
   const dashboardContext = useContext(DashboardContext);
@@ -18,13 +25,13 @@ const Dashboard = () => {
     monthlySummary,
     assetDistribution,
     netWorthGrowth,
+    dailyFlow,
     loading,
     getDashboardSummary,
     getMonthlySummary,
     getAssetDistribution,
     getNetWorthGrowth,
-    recentTransactions,
-    getDashboardTransactions,
+    getDailyFlow,
   } = dashboardContext;
 
   useEffect(() => {
@@ -36,7 +43,7 @@ const Dashboard = () => {
     getMonthlySummary(year, month);
     getAssetDistribution();
     getNetWorthGrowth();
-    getDashboardTransactions({ year, month });
+    getDailyFlow(year, month);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -102,7 +109,6 @@ const Dashboard = () => {
             cx="50%"
             cy="50%"
             outerRadius={60}
-            label
           >
             {data.map((entry, index) => (
               <Cell
@@ -112,6 +118,7 @@ const Dashboard = () => {
             ))}
           </Pie>
           <Tooltip />
+          <Legend wrapperStyle={{ fontSize: "10px" }} />
         </PieChart>
       </ResponsiveContainer>
     );
@@ -231,9 +238,9 @@ const Dashboard = () => {
           <Card sx={{ width: 590, height: 358 }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                收支紀錄
+                本月每日收支
               </Typography>
-              <RecentTransactions transactions={recentTransactions} />
+              <MonthlyBarChart data={dailyFlow} />
             </CardContent>
           </Card>
         </Box>
