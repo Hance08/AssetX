@@ -11,6 +11,9 @@ import {
   Box,
   CircularProgress,
   Paper,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
@@ -22,11 +25,14 @@ const Transactions = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
-    getTransactions();
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth() + 1;
+    getTransactions({ year, month });
     // eslint-disable-next-line
-  }, []);
+  }, [selectedDate]);
 
   const handleOpenForm = () => {
     clearCurrent();
@@ -43,6 +49,16 @@ const Transactions = () => {
 
   const handleCloseTransfer = () => {
     setTransferOpen(false);
+  };
+
+  const handleDateChange = (type, value) => {
+    const newDate = new Date(selectedDate);
+    if (type === "year") {
+      newDate.setFullYear(value);
+    } else {
+      newDate.setMonth(value - 1);
+    }
+    setSelectedDate(newDate);
   };
 
   const handleEdit = () => {
@@ -82,6 +98,15 @@ const Transactions = () => {
     </Box>
   );
 
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 10; i <= currentYear + 1; i++) {
+      years.push(i);
+    }
+    return years.reverse();
+  };
+
   return (
     <Container sx={{ width: "1200px", height: "80vh" }}>
       <Box
@@ -107,6 +132,32 @@ const Transactions = () => {
           >
             新增轉帳
           </Button>
+        </Box>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <FormControl variant="outlined" size="small">
+            <Select
+              value={selectedDate.getFullYear()}
+              onChange={(e) => handleDateChange("year", e.target.value)}
+            >
+              {generateYearOptions().map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year} 年
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl variant="outlined" size="small">
+            <Select
+              value={selectedDate.getMonth() + 1}
+              onChange={(e) => handleDateChange("month", e.target.value)}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <MenuItem key={i + 1} value={i + 1}>
+                  {i + 1} 月
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
       </Box>
 

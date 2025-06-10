@@ -28,9 +28,9 @@ const TransactionState = (props) => {
   const { getAccounts } = useContext(AccountContext);
 
   // Get Transactions
-  const getTransactions = async () => {
+  const getTransactions = async (params = {}) => {
     try {
-      const res = await axios.get("/api/transactions");
+      const res = await axios.get("/api/transactions", { params });
       dispatch({
         type: GET_TRANSACTIONS,
         payload: res.data,
