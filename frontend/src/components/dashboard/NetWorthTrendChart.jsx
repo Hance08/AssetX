@@ -4,9 +4,7 @@ import {
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -37,7 +35,6 @@ const NetWorthTrendChart = ({ data }) => {
           bottom: 5,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
         <YAxis width={50} tickFormatter={(value) => value.toLocaleString()} />
         <Tooltip formatter={(value) => `${value.toLocaleString()} 元`} />

@@ -16,6 +16,8 @@ import {
   SET_DASHBOARD_LOADING,
   GET_RECENT_TRANSACTIONS_SUCCESS,
   GET_RECENT_TRANSACTIONS_FAIL,
+  GET_DAILY_FLOW_SUCCESS,
+  GET_DAILY_FLOW_FAIL,
 } from "../types";
 
 const DashboardState = (props) => {
@@ -26,6 +28,7 @@ const DashboardState = (props) => {
     assetDistribution: [],
     netWorthGrowth: [],
     recentTransactions: [],
+    dailyFlow: [],
     loading: false,
     error: null,
   };
@@ -137,6 +140,22 @@ const DashboardState = (props) => {
     }
   };
 
+  // Get daily income and expense for a month
+  const getDailyFlow = async (year, month) => {
+    try {
+      dispatch({ type: SET_DASHBOARD_LOADING });
+      const res = await axios.get(
+        `/api/dashboard/daily-flow?year=${year}&month=${month}`
+      );
+      dispatch({ type: GET_DAILY_FLOW_SUCCESS, payload: res.data });
+    } catch (err) {
+      dispatch({
+        type: GET_DAILY_FLOW_FAIL,
+        payload: err.response?.data?.msg || "伺服器錯誤",
+      });
+    }
+  };
+
   return (
     <DashboardContext.Provider
       value={{
@@ -146,6 +165,7 @@ const DashboardState = (props) => {
         assetDistribution: state.assetDistribution,
         netWorthGrowth: state.netWorthGrowth,
         recentTransactions: state.recentTransactions,
+        dailyFlow: state.dailyFlow,
         loading: state.loading,
         error: state.error,
         getDashboardSummary,
@@ -154,6 +174,7 @@ const DashboardState = (props) => {
         getAssetDistribution,
         getNetWorthGrowth,
         getDashboardTransactions,
+        getDailyFlow,
       }}
     >
       {props.children}

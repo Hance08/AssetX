@@ -257,4 +257,68 @@ router.get('/net-worth-growth', auth, async (req, res) => {
     }
 });
 
+// @route    GET api/dashboard/daily-flow
+// @desc     取得指定月份的每日收支
+// @access   Private
+router.get('/daily-flow', auth, async (req, res) => {
+    try {
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 1));
+
+        const transactions = await Transaction.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(req.user.id),
+                    date: { $gte: startDate, $lt: endDate },
+                    category: { $ne: '帳戶轉帳' }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dayOfMonth: '$date' },
+                    totalIncome: {
+                        $sum: { $cond: [{ $gt: ['$amount', 0] }, '$amount', 0] }
+                    },
+                    totalExpense: {
+                        $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    day: '$_id',
+                    income: '$totalIncome',
+                    expense: { $abs: '$totalExpense' }
+                }
+            },
+            { $sort: { day: 1 } }
+        ]);
+
+        // 建立一個包含該月所有日期的基礎陣列
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const dailyData = Array.from({ length: daysInMonth }, (_, i) => ({
+            day: i + 1,
+            income: 0,
+            expense: 0
+        }));
+
+        // 將有交易的資料填入
+        transactions.forEach(t => {
+            const index = dailyData.findIndex(d => d.day === t.day);
+            if (index !== -1) {
+                dailyData[index] = t;
+            }
+        });
+
+        res.json(dailyData);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router; 
