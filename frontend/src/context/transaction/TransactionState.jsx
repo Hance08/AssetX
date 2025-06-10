@@ -120,6 +120,26 @@ const TransactionState = (props) => {
     dispatch({ type: CLEAR_CURRENT_TRANSACTION });
   };
 
+  // Transfer Funds
+  const transferFunds = async (transferData) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      await axios.post("/api/transactions/transfer", transferData, config);
+      // 轉帳成功後，重新取得所有交易紀錄和帳戶資料
+      getTransactions();
+      getAccounts();
+    } catch (err) {
+      dispatch({
+        type: TRANSACTION_ERROR,
+        payload: err.response.data,
+      });
+    }
+  };
+
   // Clear Transactions
   const clearTransactions = () => {
     dispatch({ type: CLEAR_TRANSACTIONS });
@@ -139,6 +159,7 @@ const TransactionState = (props) => {
         clearTransactions,
         setCurrent,
         clearCurrent,
+        transferFunds,
       }}
     >
       {props.children}

@@ -30,6 +30,10 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  transferId: {
+    type: Schema.Types.ObjectId,
+    default: null,
+  },
 }, {
   timestamps: true,
 });

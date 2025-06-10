@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Transaction = require('../models/Transaction');
 const Account = require('../models/Account');
+const mongoose = require('mongoose');
 
 // @route   GET api/transactions
 // @desc    取得該使用者的所有交易紀錄
@@ -71,6 +72,72 @@ router.post('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('伺服器錯誤');
+  }
+});
+
+// @route   POST api/transactions/transfer
+// @desc    新增一筆轉帳紀錄
+// @access  Private
+router.post('/transfer', auth, async (req, res) => {
+  const { fromAccountId, toAccountId, amount, date, notes } = req.body;
+  
+  try {
+    if (fromAccountId === toAccountId) {
+      return res.status(400).json({ msg: '轉出與轉入帳戶不能相同' });
+    }
+    if (amount <= 0) {
+      return res.status(400).json({ msg: '金額必須為正數' });
+    }
+
+    const fromAccount = await Account.findById(fromAccountId);
+    const toAccount = await Account.findById(toAccountId);
+
+    if (!fromAccount || !toAccount) {
+        return res.status(404).json({ msg: '找不到指定的帳戶' });
+    }
+    if (fromAccount.userId.toString() !== req.user.id || toAccount.userId.toString() !== req.user.id) {
+        return res.status(401).json({ msg: '無權限操作此帳戶' });
+    }
+    
+    const transferId = new mongoose.Types.ObjectId();
+
+    // 1. 更新帳戶餘額 (使用 $inc 確保原子性操作)
+    await Account.findByIdAndUpdate(fromAccountId, { $inc: { balance: -Math.abs(amount) } });
+    await Account.findByIdAndUpdate(toAccountId, { $inc: { balance: Math.abs(amount) } });
+
+    // 2. 建立轉出交易
+    const fromTransaction = new Transaction({
+      userId: req.user.id,
+      date: date || new Date(),
+      amount: -Math.abs(amount),
+      category: '帳戶轉帳',
+      accountId: fromAccountId,
+      notes: notes || `轉帳至 ${toAccount.name}`,
+      transferId,
+    });
+
+    // 3. 建立轉入交易
+    const toTransaction = new Transaction({
+        userId: req.user.id,
+        date: date || new Date(),
+        amount: Math.abs(amount),
+        category: '帳戶轉帳',
+        accountId: toAccountId,
+        notes: notes || `從 ${fromAccount.name} 轉入`,
+        transferId,
+    });
+    
+    await fromTransaction.save();
+    await toTransaction.save();
+    
+    res.json({ msg: '轉帳成功' });
+
+  } catch (error) {
+    console.error(error.message);
+    // 在非事務性操作中，如果出錯，很難安全地回滾。
+    // 開發中，我們先記錄錯誤，以便於調試。
+    // 生產環境可能需要更複雜的補償邏輯。
+    res.status(500).send('伺服器錯誤：轉帳失敗');
   }
 });
 
