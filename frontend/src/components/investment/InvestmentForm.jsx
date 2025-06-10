@@ -1,79 +1,96 @@
-import React, { useState, useContext, useEffect } from 'react';
-import InvestmentContext from '../../context/investment/investmentContext';
+import React, { useState, useContext, useEffect } from "react";
+import InvestmentContext from "../../context/investment/investmentContext";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 
-const InvestmentForm = () => {
-    const investmentContext = useContext(InvestmentContext);
-    const { addInvestment, updateInvestment, clearCurrentInvestment, current } = investmentContext;
+const InvestmentForm = ({ open, handleClose }) => {
+  const investmentContext = useContext(InvestmentContext);
+  const { addInvestment, updateInvestment, clearCurrentInvestment, current } =
+    investmentContext;
 
-    const [investment, setInvestment] = useState({
-        name: '',
-        symbol: ''
+  const [investment, setInvestment] = useState({
+    name: "",
+    symbol: "",
+  });
+
+  useEffect(() => {
+    if (current !== null) {
+      setInvestment(current);
+    } else {
+      setInvestment({
+        name: "",
+        symbol: "",
+      });
+    }
+  }, [current]);
+
+  const { name, symbol } = investment;
+
+  const onChange = (e) =>
+    setInvestment({
+      ...investment,
+      [e.target.name]: e.target.value.toUpperCase(),
     });
 
-    useEffect(() => {
-        if (current !== null) {
-            setInvestment(current);
-        } else {
-            setInvestment({
-                name: '',
-                symbol: ''
-            });
-        }
-    }, [investmentContext, current]);
+  const onSubmit = (e) => {
+    e.preventDefault();
+    if (current === null) {
+      addInvestment(investment);
+    } else {
+      updateInvestment(investment);
+    }
+    closeForm();
+  };
 
-    const { name, symbol } = investment;
+  const closeForm = () => {
+    clearCurrentInvestment();
+    handleClose();
+  };
 
-    const onChange = e => setInvestment({ ...investment, [e.target.name]: e.target.value });
-
-    const onSubmit = e => {
-        e.preventDefault();
-        if (current === null) {
-            addInvestment(investment);
-        } else {
-            updateInvestment(investment);
-        }
-        clearForm();
-    };
-
-    const clearForm = () => {
-        clearCurrentInvestment();
-    };
-
-    return (
-        <form onSubmit={onSubmit}>
-            <h2 className="text-primary">{current ? '編輯投資標的' : '新增投資標的'}</h2>
-            <input
-                type="text"
-                placeholder="股票名稱 (例如: 台積電)"
-                name="name"
-                value={name}
-                onChange={onChange}
-                required
-            />
-            <input
-                type="text"
-                placeholder="股票代號 (例如: 2330)"
-                name="symbol"
-                value={symbol}
-                onChange={onChange}
-                required
-            />
-            <div>
-                <input
-                    type="submit"
-                    value={current ? '更新標的' : '新增標的'}
-                    className="btn btn-primary btn-block"
-                />
-            </div>
-            {current && (
-                <div>
-                    <button className="btn btn-light btn-block" onClick={clearForm}>
-                        取消編輯
-                    </button>
-                </div>
-            )}
-        </form>
-    );
+  return (
+    <Dialog open={open} onClose={closeForm}>
+      <DialogTitle>{current ? "編輯投資標的" : "新增投資標的"}</DialogTitle>
+      <form onSubmit={onSubmit}>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="name"
+            label="股票名稱 (例如: 台積電)"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={name}
+            onChange={onChange}
+            required
+          />
+          <TextField
+            margin="dense"
+            name="symbol"
+            label="股票代號 (例如: 2330.TW)"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={symbol}
+            onChange={onChange}
+            required
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeForm}>取消</Button>
+          <Button type="submit" variant="contained">
+            {current ? "更新" : "新增"}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
+  );
 };
 
-export default InvestmentForm; 
+export default InvestmentForm;
