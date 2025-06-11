@@ -77,6 +77,7 @@ const AccountForm = ({ open, handleClose }) => {
         <DialogContent>
           <TextField
             autoFocus
+            autoComplete="off"
             margin="dense"
             name="name"
             label="帳戶名稱"
