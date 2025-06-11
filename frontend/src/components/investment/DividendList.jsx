@@ -42,7 +42,7 @@ const DividendList = ({ dividends, onEditDividend }) => {
   return (
     <>
       {listHeader}
-      <List disablePadding>
+      <List disablePadding sx={{ maxHeight: "55vh", overflow: "auto" }}>
         {dividends.map((dividend) => (
           <ListItem key={dividend._id} divider>
             <ListItemText
@@ -50,7 +50,11 @@ const DividendList = ({ dividends, onEditDividend }) => {
               primary={format(new Date(dividend.date), "yyyy-MM-dd")}
             />
             <ListItemText
-              sx={{ flex: 2, textAlign: "right" }}
+              sx={{
+                flex: 2,
+                textAlign: "right",
+                color: "green",
+              }}
               primary={`$${dividend.amount.toLocaleString()}`}
             />
             <Box sx={{ flex: 2, textAlign: "center" }}>

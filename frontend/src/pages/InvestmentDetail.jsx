@@ -108,7 +108,7 @@ const InvestmentDetail = () => {
   }
 
   return (
-    <Container sx={{ width: "1160px", height: "90vh" }}>
+    <Container sx={{ width: "1150px", height: "90vh" }}>
       <Button
         component={RouterLink}
         to="/investments"
@@ -136,9 +136,6 @@ const InvestmentDetail = () => {
           </Typography>
         </Box>
         <Box>
-          <Button variant="outlined" onClick={onAddNewDividend} sx={{ mr: 2 }}>
-            新增配息
-          </Button>
           <Button
             variant="outlined"
             component={RouterLink}
@@ -146,6 +143,14 @@ const InvestmentDetail = () => {
             sx={{ mr: 2 }}
           >
             投資報表
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAddNewDividend}
+            sx={{ mr: 2 }}
+          >
+            新增配息
           </Button>
           <Button
             variant="contained"
