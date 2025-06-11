@@ -8,8 +8,7 @@ import {
     CLEAR_TRANSACTIONS,
     SET_CURRENT,
     CLEAR_CURRENT,
-    SET_LOADING,
-} from './types';
+} from '../types';
 
 const transactionReducer = (state, action) => {
     switch (action.type) {

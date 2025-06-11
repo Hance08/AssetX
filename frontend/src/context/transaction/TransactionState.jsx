@@ -14,7 +14,7 @@ import {
   DELETE_TRANSACTION_SUCCESS,
   DELETE_TRANSACTION_FAIL,
   SET_LOADING,
-} from "./types";
+} from "../types";
 
 const TransactionState = (props) => {
   const initialState = {

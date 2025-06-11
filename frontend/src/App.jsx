@@ -24,6 +24,7 @@ import DashboardState from "./context/dashboard/DashboardState.jsx";
 import InvestmentState from "./context/investment/InvestmentState.jsx";
 import TradeState from "./context/trade/TradeState";
 import CategoryState from "./context/category/CategoryState";
+import DividendState from "./context/dividend/DividendState.jsx";
 import AccountContext from "./context/account/accountContext";
 import TransactionContext from "./context/transaction/transactionContext";
 import "./App.css";
@@ -133,7 +134,9 @@ function App() {
             <InvestmentState>
               <TradeState>
                 <CategoryState>
-                  <AppContent />
+                  <DividendState>
+                    <AppContent />
+                  </DividendState>
                 </CategoryState>
               </TradeState>
             </InvestmentState>
