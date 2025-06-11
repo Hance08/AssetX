@@ -60,6 +60,7 @@ const InvestmentForm = ({ open, handleClose }) => {
         <DialogContent>
           <TextField
             autoFocus
+            autoComplete="off"
             margin="dense"
             name="name"
             label="股票名稱 (例如: 台積電)"
@@ -71,6 +72,7 @@ const InvestmentForm = ({ open, handleClose }) => {
             required
           />
           <TextField
+            autoComplete="off"
             margin="dense"
             name="symbol"
             label="股票代號 (例如: 2330.TW)"
