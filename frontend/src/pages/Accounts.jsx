@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import AccountContext from "../context/account/accountContext";
 import AccountForm from "../components/account/AccountForm";
 import AccountItem from "../components/account/AccountItem";
+import AccountCard from "../components/account/AccountCard";
 import {
   Container,
   Button,
@@ -10,19 +11,31 @@ import {
   Box,
   CircularProgress,
   Paper,
+  ToggleButtonGroup,
+  ToggleButton,
+  Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
 
 const Accounts = () => {
   const accountContext = useContext(AccountContext);
   const { accounts, getAccounts, loading, clearCurrent } = accountContext;
 
   const [open, setOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("card");
 
   useEffect(() => {
     getAccounts();
     // eslint-disable-next-line
   }, []);
+
+  const handleViewModeChange = (event, newViewMode) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+    }
+  };
 
   const handleOpen = () => {
     clearCurrent(); // 確保新增時 current 為 null
@@ -74,6 +87,7 @@ const Accounts = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 2,
         }}
       >
         <Button
@@ -83,17 +97,47 @@ const Accounts = () => {
         >
           新增帳戶
         </Button>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="view mode"
+        >
+          <ToggleButton value="card" aria-label="card">
+            <ViewModuleIcon />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="list">
+            <ViewListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
       <AccountForm open={open} handleClose={handleClose} />
 
-      <Paper>
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-            <CircularProgress />
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : accounts && accounts.length > 0 ? (
+        viewMode === "card" ? (
+          <Box
+            sx={{
+              maxHeight: "calc(80vh - 150px)",
+              overflow: "auto",
+              p: 2,
+              mx: -1,
+            }}
+          >
+            <Grid container spacing={3}>
+              {accounts.map((account) => (
+                <Grid item xs={12} sm={6} md={4} key={account._id}>
+                  <AccountCard account={account} onEdit={handleEdit} />
+                </Grid>
+              ))}
+            </Grid>
           </Box>
-        ) : accounts && accounts.length > 0 ? (
-          <>
+        ) : (
+          <Paper>
             {listHeader}
             <Box sx={{ maxHeight: 500, overflow: "auto" }}>
               <List disablePadding>
@@ -106,13 +150,13 @@ const Accounts = () => {
                 ))}
               </List>
             </Box>
-          </>
-        ) : (
-          <Typography sx={{ p: 4, textAlign: "center" }}>
-            您尚未新增任何帳戶。
-          </Typography>
-        )}
-      </Paper>
+          </Paper>
+        )
+      ) : (
+        <Typography sx={{ p: 4, textAlign: "center" }}>
+          您尚未新增任何帳戶。
+        </Typography>
+      )}
     </Container>
   );
 };
