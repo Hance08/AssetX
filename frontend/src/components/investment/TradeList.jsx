@@ -62,7 +62,7 @@ const TradeList = ({ onEditTrade }) => {
   return (
     <>
       {listHeader}
-      <List disablePadding sx={{ maxHeight: "55vh", overflow: "auto" }}>
+      <List disablePadding sx={{ maxHeight: "50vh", overflow: "auto" }}>
         {trades.map((trade) => (
           <TradeItem key={trade._id} trade={trade} onEditClick={onEditTrade} />
         ))}
