@@ -2,8 +2,11 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import InvestmentContext from "../context/investment/investmentContext";
 import TradeContext from "../context/trade/tradeContext";
+import DividendContext from "../context/dividend/dividendContext";
 import TradeList from "../components/investment/TradeList";
 import TradeForm from "../components/investment/TradeForm";
+import DividendList from "../components/investment/DividendList";
+import DividendForm from "../components/investment/DividendForm";
 import {
   Container,
   Typography,
@@ -11,20 +14,40 @@ import {
   Box,
   Paper,
   CircularProgress,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
+
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
 const InvestmentDetail = () => {
   const { investmentId } = useParams();
   const investmentContext = useContext(InvestmentContext);
   const tradeContext = useContext(TradeContext);
+  const dividendContext = useContext(DividendContext);
 
   const {
-    investments,
+    current: currentInvestment, // Use current from context
     getInvestment,
     loading: investmentLoading,
   } = investmentContext;
+
   const {
     trades,
     getTrades,
@@ -33,18 +56,28 @@ const InvestmentDetail = () => {
     clearCurrentTrade,
   } = tradeContext;
 
-  const [showTradeForm, setShowTradeForm] = useState(false);
+  const {
+    dividends,
+    getDividends,
+    loading: dividendLoading,
+    setCurrentDividend,
+    clearCurrentDividend,
+  } = dividendContext;
 
-  // Find the specific investment from the list, or fetch if not available
-  const currentInvestment = investments.find((inv) => inv._id === investmentId);
+  const [showTradeForm, setShowTradeForm] = useState(false);
+  const [showDividendForm, setShowDividendForm] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
-    if (!currentInvestment) {
-      getInvestment(investmentId);
-    }
+    getInvestment(investmentId);
     getTrades(investmentId);
+    getDividends(investmentId);
     // eslint-disable-next-line
   }, [investmentId]);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
 
   const onEditTrade = (trade) => {
     setCurrentTrade(trade);
@@ -52,8 +85,18 @@ const InvestmentDetail = () => {
   };
 
   const onAddNewTrade = () => {
-    clearCurrentTrade(); // Use the correct function name
+    clearCurrentTrade();
     setShowTradeForm(true);
+  };
+
+  const onEditDividend = (dividend) => {
+    setCurrentDividend(dividend);
+    setShowDividendForm(true);
+  };
+
+  const onAddNewDividend = () => {
+    clearCurrentDividend();
+    setShowDividendForm(true);
   };
 
   if (investmentLoading || !currentInvestment) {
@@ -65,7 +108,7 @@ const InvestmentDetail = () => {
   }
 
   return (
-    <Container sx={{ width: "1200px", height: "80vh" }}>
+    <Container sx={{ width: "1160px", height: "90vh" }}>
       <Button
         component={RouterLink}
         to="/investments"
@@ -93,6 +136,9 @@ const InvestmentDetail = () => {
           </Typography>
         </Box>
         <Box>
+          <Button variant="outlined" onClick={onAddNewDividend} sx={{ mr: 2 }}>
+            新增配息
+          </Button>
           <Button
             variant="outlined"
             component={RouterLink}
@@ -116,15 +162,44 @@ const InvestmentDetail = () => {
         onClose={() => setShowTradeForm(false)}
         investmentId={investmentId}
       />
+      <DividendForm
+        open={showDividendForm}
+        onClose={() => setShowDividendForm(false)}
+        investmentId={investmentId}
+      />
 
       <Paper>
-        {tradeLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <TradeList trades={trades} onEditTrade={onEditTrade} />
-        )}
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="investment tabs"
+          >
+            <Tab label="交易紀錄" />
+            <Tab label="配息紀錄" />
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={tabValue} index={0}>
+          {tradeLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TradeList trades={trades} onEditTrade={onEditTrade} />
+          )}
+        </CustomTabPanel>
+        <CustomTabPanel value={tabValue} index={1}>
+          {dividendLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <DividendList
+              dividends={dividends}
+              onEditDividend={onEditDividend}
+            />
+          )}
+        </CustomTabPanel>
       </Paper>
     </Container>
   );
