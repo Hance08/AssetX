@@ -153,7 +153,7 @@ const Transactions = () => {
   };
 
   return (
-    <Container sx={{ width: "1200px", height: "80vh" }}>
+    <Container sx={{ width: "1150px", height: "80vh" }}>
       <Box
         sx={{
           my: 2,

@@ -80,7 +80,7 @@ const Accounts = () => {
   );
 
   return (
-    <Container sx={{ width: "1200px", height: "80vh" }}>
+    <Container sx={{ width: "1150px", height: "80vh" }}>
       <Box
         sx={{
           my: 2,
@@ -124,7 +124,7 @@ const Accounts = () => {
             sx={{
               maxHeight: "calc(80vh - 150px)",
               overflow: "auto",
-              p: 2,
+              p: 1,
               mx: -1,
             }}
           >
