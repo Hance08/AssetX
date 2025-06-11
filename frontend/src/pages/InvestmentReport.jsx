@@ -114,27 +114,36 @@ const InvestmentReport = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-        <Box sx={{ display: "flex", flexDirection: "row", gap: "28px" }}>
+      <Box sx={{ display: "flex", flexDirection: "row", gap: "28px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "28px" }}>
           <StatCard
             title="總市值"
-            value={`$${totalMarketValue.toLocaleString(undefined, {
+            value={`${totalMarketValue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`}
-          />
-          <StatCard
-            title="未實現損益"
-            value={`$${unrealizedGain.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
-            valueColor={unrealizedGain >= 0 ? "green" : "red"}
           />
           <StatCard
             title="總投入成本"
             value={`${currentInvestment.totalCost.toLocaleString()}`}
           />
+          <StatCard
+            title="未實現損益(未含配息)"
+            value={`${unrealizedGain.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
+            valueColor={unrealizedGain >= 0 ? "green" : "red"}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "300px",
+            gap: "28px",
+          }}
+        >
           <StatCard
             title="累計總配息"
             value={`${totalDividends.toLocaleString()}`}
@@ -160,7 +169,7 @@ const InvestmentReport = () => {
                   <CircularProgress />
                 </Box>
               ) : trades && trades.length > 0 ? (
-                <Box sx={{ height: 300 }}>
+                <Box sx={{ height: 320 }}>
                   <PriceHistoryChart data={trades} />
                 </Box>
               ) : (
