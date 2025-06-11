@@ -33,6 +33,7 @@ export default (state, action) => {
         case GET_INVESTMENT_SUCCESS:
             return {
                 ...state,
+                current: action.payload,
                 investments: state.investments.some(
                     (inv) => inv._id === action.payload._id
                 )
