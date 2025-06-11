@@ -92,13 +92,23 @@ const InvestmentDetail = () => {
             {currentInvestment.totalCost.toLocaleString()}
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={onAddNewTrade}
-        >
-          新增交易
-        </Button>
+        <Box>
+          <Button
+            variant="outlined"
+            component={RouterLink}
+            to={`/investment-report/${investmentId}`}
+            sx={{ mr: 2 }}
+          >
+            投資報表
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAddNewTrade}
+          >
+            新增交易
+          </Button>
+        </Box>
       </Box>
 
       <TradeForm
