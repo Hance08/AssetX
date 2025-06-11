@@ -37,7 +37,7 @@ const TradeItem = ({ trade, onEditClick }) => {
           {shares.toLocaleString()}股
         </Typography>
         <Typography sx={{ flex: 1.5, textAlign: "right" }} variant="body2">
-          ${price.toLocaleString()}
+          {price.toLocaleString()}
         </Typography>
         <Typography sx={{ flex: 1.5, textAlign: "right" }} variant="body2">
           {fee.toLocaleString()}
