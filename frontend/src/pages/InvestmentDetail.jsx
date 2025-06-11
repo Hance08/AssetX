@@ -107,8 +107,13 @@ const InvestmentDetail = () => {
     );
   }
 
+  const averageCost =
+    currentInvestment.totalShares > 0
+      ? currentInvestment.totalCost / currentInvestment.totalShares
+      : 0;
+
   return (
-    <Container sx={{ width: "1150px", height: "90vh" }}>
+    <Container sx={{ width: "1160px", height: "90vh" }}>
       <Button
         component={RouterLink}
         to="/investments"
@@ -132,7 +137,8 @@ const InvestmentDetail = () => {
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
             目前持有: {currentInvestment.totalShares} 股 | 市價: ${" "}
-            {currentInvestment.currentPrice.toFixed(2)}
+            {currentInvestment.currentPrice.toFixed(2)} | 平均成本: ${" "}
+            {averageCost.toFixed(2)}
           </Typography>
           <Typography variant="h6" color="text.secondary">
             總市值: ${" "}
