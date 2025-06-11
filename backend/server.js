@@ -28,7 +28,7 @@ const connectDB = async () => {
 
 connectDB();
 
-app.get('/', (req, res) => {
+app.get('/', (res) => {
   res.send('後端伺服器已成功啟動！');
 });
 

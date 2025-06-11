@@ -11,7 +11,6 @@ import {
   Typography,
   Container,
 } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import AuthContext from "../context/AuthContext";
 
 const Login = () => {
