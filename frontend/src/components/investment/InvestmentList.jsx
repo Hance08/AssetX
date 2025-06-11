@@ -34,6 +34,12 @@ const InvestmentList = () => {
         持有股數
       </Typography>
       <Typography sx={{ flex: 2, textAlign: "right" }} variant="subtitle2">
+        市價
+      </Typography>
+      <Typography sx={{ flex: 2, textAlign: "right" }} variant="subtitle2">
+        總市值
+      </Typography>
+      <Typography sx={{ flex: 2, textAlign: "right" }} variant="subtitle2">
         總成本
       </Typography>
       <Typography sx={{ flex: 2, textAlign: "center" }} variant="subtitle2">

@@ -5,6 +5,7 @@ const Investment = require('../models/Investment');
 const InvestmentTrade = require('../models/InvestmentTrade');
 const Dividend = require('../models/Dividend');
 const mongoose = require('mongoose');
+const yahooFinance = require('yahoo-finance2').default;
 
 // @route   POST api/investments
 // @desc    新增一個投資標的
@@ -30,6 +31,34 @@ router.post('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('伺服器錯誤');
+  }
+});
+
+// @route   GET api/investments/price/:symbol
+// @desc    取得指定股票代號的即時股價
+// @access  Private
+router.get('/price/:symbol', auth, async (req, res) => {
+  try {
+    let symbol = req.params.symbol.toUpperCase();
+
+    // 判斷是否為台股（4～5位數字），才加上 .TW
+    if (/^[0-9]{4,5}$/.test(symbol)) {
+      symbol += '.TW';
+    }
+    
+    const result = await yahooFinance.quote(symbol);
+
+    if (!result || !result.regularMarketPrice) {
+      // If no result or no price, return a default or an error
+      // For now, let's return a default price of 0 to avoid breaking frontend logic
+      return res.json({ price: 0 });
+    }
+    
+    res.json({ price: result.regularMarketPrice });
+  } catch (err) {
+    console.error(`Error fetching price for ${req.params.symbol}:`, err.message);
+    // Even if there's an error, return a default price to prevent frontend from breaking
+    res.json({ price: 0 });
   }
 });
 

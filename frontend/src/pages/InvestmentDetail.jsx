@@ -131,8 +131,22 @@ const InvestmentDetail = () => {
             {currentInvestment.name} ({currentInvestment.symbol})
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            目前持有: {currentInvestment.totalShares} 股 | 總成本:{" "}
-            {currentInvestment.totalCost.toLocaleString()}
+            目前持有: {currentInvestment.totalShares} 股 | 市價: ${" "}
+            {currentInvestment.currentPrice.toFixed(2)}
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            總市值: ${" "}
+            {(
+              currentInvestment.totalShares * currentInvestment.currentPrice
+            ).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
+            | 總成本: $
+            {currentInvestment.totalCost.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </Typography>
         </Box>
         <Box>

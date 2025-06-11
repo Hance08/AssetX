@@ -1,10 +1,10 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InvestmentContext from "../../context/investment/investmentContext";
-import { ListItem, IconButton, Typography, Box } from "@mui/material";
+import { ListItem, ListItemText, IconButton, Box } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PageviewIcon from "@mui/icons-material/Pageview";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 const InvestmentItem = ({ investment }) => {
@@ -15,7 +15,10 @@ const InvestmentItem = ({ investment }) => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { _id, name, symbol, totalShares, totalCost } = investment;
+  const { _id, name, symbol, totalShares, totalCost, currentPrice } =
+    investment;
+
+  const totalMarketValue = totalShares * currentPrice;
 
   const onDeleteConfirm = () => {
     deleteInvestment(_id);
@@ -34,28 +37,43 @@ const InvestmentItem = ({ investment }) => {
 
   return (
     <>
-      <ListItem divider sx={{ display: "flex", px: 2, py: 1.5, gap: 2 }}>
-        <Typography sx={{ flex: 2, fontWeight: "bold" }} variant="body1">
-          {symbol}
-        </Typography>
-        <Typography sx={{ flex: 2 }} variant="body1">
-          {name}
-        </Typography>
-        <Typography sx={{ flex: 2, textAlign: "right" }} variant="body2">
-          {totalShares || 0} 股
-        </Typography>
-        <Typography sx={{ flex: 2, textAlign: "right" }} variant="body2">
-          {totalCost ? totalCost.toLocaleString() : 0}
-        </Typography>
-        <Box sx={{ flex: 2, textAlign: "center" }}>
-          <IconButton
-            onClick={handleViewDetails}
-            size="small"
-            aria-label="查看詳情"
-          >
-            <PageviewIcon />
+      <ListItem divider sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <ListItemText sx={{ flex: 2, fontWeight: "bold" }} primary={symbol} />
+        <ListItemText sx={{ flex: 2 }} primary={name} />
+        <ListItemText
+          sx={{ flex: 2, textAlign: "right" }}
+          primary={totalShares.toLocaleString()}
+        />
+        <ListItemText
+          sx={{ flex: 2, textAlign: "right" }}
+          primary={`$${currentPrice.toFixed(2)}`}
+        />
+        <ListItemText
+          sx={{ flex: 2, textAlign: "right" }}
+          primary={`$${totalMarketValue.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
+        />
+        <ListItemText
+          sx={{ flex: 2, textAlign: "right" }}
+          primary={`$${totalCost.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
+        />
+        <Box
+          sx={{
+            flex: 2,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton onClick={handleViewDetails} size="small">
+            <VisibilityIcon />
           </IconButton>
-          <IconButton onClick={onEdit} size="small" aria-label="編輯名稱/代號">
+          <IconButton onClick={onEdit} size="small">
             <EditIcon />
           </IconButton>
           <IconButton
