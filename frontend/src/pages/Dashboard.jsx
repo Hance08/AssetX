@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -15,6 +15,7 @@ import {
   Legend,
 } from "recharts";
 import DashboardContext from "../context/dashboard/dashboardContext";
+import InvestmentContext from "../context/investment/investmentContext";
 import NetWorthTrendChart from "../components/dashboard/NetWorthTrendChart";
 import MonthlyBarChart from "../components/dashboard/MonthlyBarChart";
 
@@ -34,6 +35,9 @@ const Dashboard = () => {
     getDailyFlow,
   } = dashboardContext;
 
+  const investmentContext = useContext(InvestmentContext);
+  const { investments, getInvestments } = investmentContext;
+
   useEffect(() => {
     const now = new Date();
     const year = now.getFullYear();
@@ -44,8 +48,21 @@ const Dashboard = () => {
     getAssetDistribution();
     getNetWorthGrowth();
     getDailyFlow(year, month);
+    getInvestments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const investmentDistributionData = useMemo(() => {
+    if (!investments || investments.length === 0) {
+      return [];
+    }
+    return investments
+      .filter((inv) => inv.totalShares > 0)
+      .map((inv) => ({
+        name: inv.name,
+        value: inv.totalShares,
+      }));
+  }, [investments]);
 
   const COLORS = [
     "#0088FE",
@@ -54,13 +71,6 @@ const Dashboard = () => {
     "#FF8042",
     "#AF19FF",
     "#FF4560",
-  ];
-
-  const mockInvestmentData = [
-    { name: "台股", value: 250000 },
-    { name: "美股", value: 300000 },
-    { name: "加密貨幣", value: 100000 },
-    { name: "基金", value: 50000 },
   ];
 
   if (loading && !summary) {
@@ -108,7 +118,10 @@ const Dashboard = () => {
             nameKey={nameKey}
             cx="50%"
             cy="50%"
-            outerRadius={60}
+            innerRadius={45}
+            outerRadius={70}
+            paddingAngle={5}
+            cornerRadius={5}
           >
             {data.map((entry, index) => (
               <Cell
@@ -222,11 +235,11 @@ const Dashboard = () => {
               sx={{ height: "100%", display: "flex", flexDirection: "column" }}
             >
               <Typography variant="h6" align="center">
-                投資分佈 (模擬)
+                投資分佈
               </Typography>
               <Box sx={{ flexGrow: 1, width: "100%", minHeight: 0 }}>
                 <ChartCard
-                  data={mockInvestmentData}
+                  data={investmentDistributionData}
                   dataKey="value"
                   nameKey="name"
                 />
