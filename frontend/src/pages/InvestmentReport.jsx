@@ -81,6 +81,10 @@ const InvestmentReport = () => {
     );
   }
 
+  const totalMarketValue =
+    currentInvestment.totalShares * currentInvestment.currentPrice;
+  const unrealizedGain = totalMarketValue - currentInvestment.totalCost;
+
   const StatCard = ({ title, value, valueColor }) => (
     <Card>
       <CardContent>
@@ -113,8 +117,19 @@ const InvestmentReport = () => {
       <Box sx={{ display: "flex", flexDirection: "column", gap: "28px" }}>
         <Box sx={{ display: "flex", flexDirection: "row", gap: "28px" }}>
           <StatCard
-            title="目前總股數"
-            value={`${currentInvestment.totalShares.toLocaleString()} 股`}
+            title="總市值"
+            value={`$${totalMarketValue.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
+          />
+          <StatCard
+            title="未實現損益"
+            value={`$${unrealizedGain.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
+            valueColor={unrealizedGain >= 0 ? "green" : "red"}
           />
           <StatCard
             title="總投入成本"

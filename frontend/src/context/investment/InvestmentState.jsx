@@ -35,8 +35,26 @@ const InvestmentState = (props) => {
   const getInvestments = async () => {
     setLoading();
     try {
+      // 1. Get all investments from our backend
       const res = await axios.get("/api/investments");
-      dispatch({ type: GET_INVESTMENTS_SUCCESS, payload: res.data });
+      const investments = res.data;
+
+      // 2. Fetch real-time prices for each investment
+      const pricePromises = investments.map((inv) =>
+        axios.get(`/api/investments/price/${inv.symbol}`)
+      );
+      const priceResponses = await Promise.all(pricePromises);
+
+      // 3. Combine investment data with real-time prices
+      const investmentsWithPrices = investments.map((inv, index) => ({
+        ...inv,
+        currentPrice: priceResponses[index].data.price,
+      }));
+
+      dispatch({
+        type: GET_INVESTMENTS_SUCCESS,
+        payload: investmentsWithPrices,
+      });
     } catch (err) {
       dispatch({
         type: GET_INVESTMENTS_FAIL,
@@ -50,7 +68,15 @@ const InvestmentState = (props) => {
     try {
       dispatch({ type: SET_INVESTMENT_LOADING });
       const res = await axios.get(`/api/investments/${id}`);
-      dispatch({ type: GET_INVESTMENT_SUCCESS, payload: res.data });
+      const investment = res.data;
+
+      // Fetch real-time price for the single investment
+      const priceRes = await axios.get(
+        `/api/investments/price/${investment.symbol}`
+      );
+      investment.currentPrice = priceRes.data.price;
+
+      dispatch({ type: GET_INVESTMENT_SUCCESS, payload: investment });
     } catch (err) {
       dispatch({
         type: GET_INVESTMENT_FAIL,
