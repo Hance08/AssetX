@@ -118,7 +118,7 @@ const Dashboard = () => {
             nameKey={nameKey}
             cx="50%"
             cy="50%"
-            innerRadius={45}
+            innerRadius={50}
             outerRadius={70}
             paddingAngle={5}
             cornerRadius={5}
