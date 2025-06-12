@@ -1,8 +1,9 @@
 import React from "react";
 import {
   ResponsiveContainer,
-  AreaChart,
+  ComposedChart,
   Area,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -18,11 +19,15 @@ const PriceHistoryChart = ({ data }) => {
   // Custom Tooltip
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      const price = payload.find((p) => p.dataKey === "price")?.value;
+      const shares = payload.find((p) => p.dataKey === "shares")?.value;
+      const type = payload.find((p) => p.dataKey === "shares")?.payload.type;
+
       return (
         <div
           className="custom-tooltip"
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
             padding: "10px",
             border: "1px solid #ccc",
           }}
@@ -31,7 +36,15 @@ const PriceHistoryChart = ({ data }) => {
             new Date(label),
             "yyyy-MM-dd"
           )}`}</p>
-          <p className="intro">{`價格 : $${payload[0].value}`}</p>
+          {price && <p className="intro">{`價格 : $${price.toFixed(2)}`}</p>}
+          {shares && (
+            <p
+              className="intro"
+              style={{ color: type === "buy" ? "green" : "red" }}
+            >
+              {`股數 : ${shares} (${type === "buy" ? "買入" : "賣出"})`}
+            </p>
+          )}
         </div>
       );
     }
@@ -40,7 +53,7 @@ const PriceHistoryChart = ({ data }) => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart
+      <ComposedChart
         data={sortedData}
         margin={{
           top: 20,
@@ -57,16 +70,36 @@ const PriceHistoryChart = ({ data }) => {
         </defs>
         <XAxis
           dataKey="date"
-          tickFormatter={(tick) => format(new Date(tick), "MM/dd")}
+          tickFormatter={() => ""}
+          tickLine={false}
           padding={{ left: 20, right: 20 }}
         />
         <YAxis
+          yAxisId="left"
           dataKey="price"
           domain={["auto", "dataMax + 5"]}
           tickFormatter={(tick) => `$${tick}`}
+          tickLine={false}
+          stroke="#8884d8"
+        />
+        <YAxis
+          yAxisId="right"
+          dataKey="shares"
+          orientation="right"
+          stroke="#82ca9d"
+          tickLine={false}
+          domain={[0, 2000]}
         />
         <Tooltip content={<CustomTooltip />} />
+        <Bar
+          yAxisId="right"
+          dataKey="shares"
+          name="股數"
+          fill="#82ca9d"
+          radius={[3, 3, 0, 0]}
+        />
         <Area
+          yAxisId="left"
           type="monotone"
           dataKey="price"
           name="股價"
@@ -75,7 +108,7 @@ const PriceHistoryChart = ({ data }) => {
           fill="url(#colorPrice)"
           activeDot={{ r: 8 }}
         />
-      </AreaChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 };
