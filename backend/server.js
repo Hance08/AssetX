@@ -28,7 +28,7 @@ const connectDB = async () => {
 
 connectDB();
 
-app.get('/', (req, res) => {
+app.get('/', (res) => {
   res.send('後端伺服器已成功啟動！');
 });
 
@@ -40,10 +40,11 @@ app.use('/api/investments', require('./src/routes/investments'));
 app.use('/api/trades', require('./src/routes/investmentTrades'));
 app.use('/api/dividends', require('./src/routes/dividends'));
 app.use('/api/dashboard', require('./src/routes/dashboard'));
+app.use('/api/categories', require('./src/routes/categories'));
 
 const { scheduleMonthlySnapshot } = require('./src/services/snapshotService');
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`伺服器正在 port ${PORT} 上運行`);

@@ -1,11 +1,14 @@
 import {
     GET_TRANSACTIONS,
     ADD_TRANSACTION,
-    DELETE_TRANSACTION,
+    DELETE_TRANSACTION_SUCCESS,
+    DELETE_TRANSACTION_FAIL,
     UPDATE_TRANSACTION,
     TRANSACTION_ERROR,
-    CLEAR_TRANSACTIONS
-} from './types';
+    CLEAR_TRANSACTIONS,
+    SET_CURRENT,
+    CLEAR_CURRENT,
+} from '../types';
 
 const transactionReducer = (state, action) => {
     switch (action.type) {
@@ -29,13 +32,26 @@ const transactionReducer = (state, action) => {
                 ),
                 loading: false
             };
-        case DELETE_TRANSACTION:
+        case DELETE_TRANSACTION_SUCCESS:
             return {
                 ...state,
-                transactions: state.transactions.filter(
-                    transaction => transaction._id !== action.payload
-                ),
-                loading: false
+                transactions: state.transactions.filter((transaction) => {
+                    if (action.isTransfer) {
+                        return transaction.transferId !== action.payload;
+                    }
+                    return transaction._id !== action.payload;
+                }),
+                loading: false,
+            };
+        case SET_CURRENT:
+            return {
+                ...state,
+                current: action.payload
+            };
+        case CLEAR_CURRENT:
+            return {
+                ...state,
+                current: null
             };
         case CLEAR_TRANSACTIONS:
             return {
@@ -44,6 +60,7 @@ const transactionReducer = (state, action) => {
                 error: null,
             }
         case TRANSACTION_ERROR:
+        case DELETE_TRANSACTION_FAIL:
             return {
                 ...state,
                 error: action.payload

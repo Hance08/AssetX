@@ -1,41 +1,160 @@
-import React, { useContext } from 'react';
-import TransactionContext from '../../context/transaction/transactionContext';
+import React, { useContext, useState } from "react";
+import TransactionContext from "../../context/transaction/transactionContext";
+import { ListItem, IconButton, Typography, Box } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import ConfirmDialog from "../common/ConfirmDialog";
+import moment from "moment";
 
-const TransactionItem = ({ transaction }) => {
-    const transactionContext = useContext(TransactionContext);
-    const { deleteTransaction } = transactionContext;
+const TransactionItem = ({ transaction, onEdit }) => {
+  const transactionContext = useContext(TransactionContext);
+  const { deleteTransaction, setCurrent, clearCurrent } = transactionContext;
 
-    const { _id, date, notes, amount, accountId, category } = transaction;
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-    const onDelete = () => {
-        deleteTransaction(_id);
-    };
-    
-    // 簡單的日期格式化
-    const formattedDate = new Date(date).toLocaleDateString('zh-TW');
+  const {
+    _id,
+    date,
+    notes,
+    amount,
+    accountId,
+    category,
+    subcategory,
+    isTransfer,
+    fromAccount,
+    toAccount,
+    transferId,
+  } = transaction;
 
-    // 根據 amount 的正負來決定是否為支出
-    const isExpense = amount < 0;
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
 
-    const amountStyle = {
-        color: isExpense ? 'red' : 'green'
-    };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
-    return (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', margin: '1rem 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div>
-                    <h4>{category}</h4>
-                    <small>帳戶: {accountId ? accountId.name : 'N/A'} | 備註: {notes}</small> <br/>
-                    <small>日期: {formattedDate}</small>
-                </div>
-                <div style={amountStyle}>
-                    <h3>{isExpense ? '' : '+'} {amount.toLocaleString()}</h3>
-                </div>
-            </div>
-            <button className="btn btn-danger btn-sm" onClick={onDelete}>刪除</button>
-        </div>
-    );
+  const onDeleteConfirm = () => {
+    // If it's a transfer, the delete action might need to be handled differently,
+    // e.g., deleting both linked transactions. For now, we delete by the provided id,
+    // assuming the backend handles the pair deletion if given a transferId.
+    deleteTransaction(_id, transferId);
+    clearCurrent();
+    handleCloseDialog();
+  };
+
+  const handleEdit = () => {
+    setCurrent(transaction);
+    onEdit();
+  };
+
+  const amountColor = isTransfer
+    ? "text.primary"
+    : amount < 0
+    ? "error.main"
+    : "success.main";
+
+  return (
+    <>
+      <ListItem divider sx={{ display: "flex", px: 2, py: 1.5, gap: 2 }}>
+        <Typography sx={{ flex: 1.5 }} variant="body2">
+          {moment(date).format("YYYY-MM-DD")}
+        </Typography>
+
+        {isTransfer ? (
+          <>
+            <Typography
+              sx={{ flex: 1.5, display: "flex", alignItems: "center" }}
+              variant="body1"
+            >
+              帳戶轉帳
+            </Typography>
+            <Typography sx={{ flex: 1 }} variant="body2" color="text.secondary">
+              <CompareArrowsIcon />
+            </Typography>
+            <Typography
+              sx={{ flex: 1.5 }}
+              variant="body2"
+              color="text.secondary"
+            >
+              {toAccount}
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Typography sx={{ flex: 1.5 }} variant="body1">
+              {category}
+            </Typography>
+            <Typography sx={{ flex: 1 }} variant="body2" color="text.secondary">
+              {subcategory}
+            </Typography>
+            <Typography
+              sx={{ flex: 1.5 }}
+              variant="body2"
+              color="text.secondary"
+            >
+              {accountId ? accountId.name : "N/A"}
+            </Typography>
+          </>
+        )}
+
+        <Typography
+          sx={{
+            flex: 1,
+            textAlign: "right",
+            fontWeight: "bold",
+            color: amountColor,
+          }}
+        >
+          {amount.toLocaleString()}
+        </Typography>
+        {isTransfer ? (
+          <Typography
+            sx={{ flex: 3, wordBreak: "break-word", textAlign: "center" }}
+            variant="body2"
+            color="text.secondary"
+          >
+            {fromAccount} → {toAccount}
+          </Typography>
+        ) : (
+          <Typography
+            sx={{ flex: 3, wordBreak: "break-word", textAlign: "center" }}
+            variant="body2"
+            color="text.secondary"
+          >
+            {notes}
+          </Typography>
+        )}
+        <Box sx={{ flex: 1.5, textAlign: "center" }}>
+          <IconButton
+            edge="end"
+            aria-label="edit"
+            onClick={handleEdit}
+            size="small"
+            disabled={isTransfer}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            edge="end"
+            aria-label="delete"
+            onClick={handleOpenDialog}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </ListItem>
+      <ConfirmDialog
+        open={dialogOpen}
+        handleClose={handleCloseDialog}
+        handleConfirm={onDeleteConfirm}
+        title="確認刪除"
+        message={`您確定要刪除這筆紀錄嗎？此操作將無法復原。`}
+      />
+    </>
+  );
 };
 
-export default TransactionItem; 
+export default TransactionItem;

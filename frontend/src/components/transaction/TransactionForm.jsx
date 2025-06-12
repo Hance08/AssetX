@@ -1,81 +1,210 @@
-import React, { useState, useContext, useEffect } from 'react';
-import TransactionContext from '../../context/transaction/transactionContext';
-import AccountContext from '../../context/account/accountContext';
+import React, { useState, useContext, useEffect } from "react";
+import TransactionContext from "../../context/transaction/transactionContext";
+import AccountContext from "../../context/account/accountContext";
+import CategorySelectionDialog from "./CategorySelectionDialog";
+import {
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+} from "@mui/material";
 
-const TransactionForm = () => {
-    const transactionContext = useContext(TransactionContext);
-    const accountContext = useContext(AccountContext);
+const TransactionForm = ({ open, handleClose }) => {
+  const transactionContext = useContext(TransactionContext);
+  const accountContext = useContext(AccountContext);
 
-    const { addTransaction } = transactionContext;
-    const { accounts, getAccounts } = accountContext;
+  const { addTransaction, updateTransaction, current, clearCurrent } =
+    transactionContext;
+  const { accounts, getAccounts } = accountContext;
 
-    useEffect(() => {
-        getAccounts();
-        // eslint-disable-next-line
-    }, []);
-    
-    const [transaction, setTransaction] = useState({
-        notes: '',
-        amount: 0,
-        type: 'expense',
-        date: new Date().toISOString().slice(0, 10), // yyyy-mm-dd
-        category: 'food',
-        accountId: ''
+  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      getAccounts();
+    }
+    // eslint-disable-next-line
+  }, [open]);
+
+  useEffect(() => {
+    if (current) {
+      setTransaction({
+        ...current,
+        date: new Date(current.date).toISOString().slice(0, 10),
+        amount: Math.abs(current.amount),
+        type: current.amount < 0 ? "expense" : "income",
+        accountId: current.accountId._id || current.accountId,
+        subcategory: current.subcategory || "",
+      });
+    } else {
+      setTransaction({
+        notes: "",
+        amount: "",
+        type: "expense",
+        date: new Date().toISOString().slice(0, 10),
+        category: "",
+        subcategory: "",
+        accountId: accounts && accounts.length > 0 ? accounts[0]._id : "",
+      });
+    }
+  }, [current, open, accounts]);
+
+  const [transaction, setTransaction] = useState({
+    notes: "",
+    amount: "",
+    type: "expense",
+    date: new Date().toISOString().slice(0, 10),
+    category: "",
+    subcategory: "",
+    accountId: "",
+  });
+
+  const { notes, amount, type, date, category, subcategory, accountId } =
+    transaction;
+
+  const onChange = (e) => {
+    setTransaction({
+      ...transaction,
+      [e.target.name]: e.target.value,
     });
+  };
 
-    const { notes, amount, type, date, category, accountId } = transaction;
+  const handleCategorySelect = (selectedCategory, selectedSubcategory) => {
+    setTransaction({
+      ...transaction,
+      category: selectedCategory,
+      subcategory: selectedSubcategory,
+    });
+  };
 
-    const onChange = e => {
-        setTransaction({ 
-            ...transaction, 
-            [e.target.name]: e.target.name === 'amount' ? parseFloat(e.target.value) || 0 : e.target.value 
-        });
+  const onSubmit = (e) => {
+    e.preventDefault();
+    if (!accountId) {
+      return alert("請選擇一個帳戶");
+    }
+    if (!category || !subcategory) {
+      return alert("請選擇交易分類");
     }
 
-    const onSubmit = e => {
-        e.preventDefault();
-        if(!accountId){
-            return alert('請選擇一個帳戶');
-        }
-        addTransaction(transaction);
-        // Clear form
-        setTransaction({
-            notes: '',
-            amount: 0,
-            type: 'expense',
-            date: new Date().toISOString().slice(0, 10),
-            category: 'food',
-            accountId: ''
-        });
-    };
+    const transactionData = { ...transaction, amount: parseFloat(amount) };
 
-    return (
+    if (current === null) {
+      addTransaction(transactionData);
+    } else {
+      updateTransaction(transactionData);
+    }
+    closeForm();
+  };
+
+  const closeForm = () => {
+    handleClose();
+    clearCurrent();
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={closeForm}>
+        <DialogTitle>{current ? "編輯交易" : "新增交易"}</DialogTitle>
         <form onSubmit={onSubmit}>
-            <h2>新增交易</h2>
-            <select name="accountId" value={accountId} onChange={onChange} required>
-                <option value="" disabled>-- 請選擇帳戶 --</option>
-                {accounts.map(account => (
-                    <option key={account._id} value={account._id}>
-                        {account.name}
-                    </option>
+          <DialogContent>
+            <FormControl fullWidth margin="dense" required>
+              <InputLabel sx={{ bgcolor: "background.paper", px: 1 }}>
+                帳戶
+              </InputLabel>
+              <Select name="accountId" value={accountId} onChange={onChange}>
+                {accounts.map((account) => (
+                  <MenuItem key={account._id} value={account._id}>
+                    {account.name}
+                  </MenuItem>
                 ))}
-            </select>
-            <input type="text" placeholder="備註" name="notes" value={notes} onChange={onChange} />
-            <input type="number" placeholder="金額" name="amount" value={amount} onChange={onChange} required />
-            <input type="date" name="date" value={date} onChange={onChange} required />
-            
-            <h5>類型</h5>
-            <input type="radio" name="type" value="expense" checked={type === 'expense'} onChange={onChange} /> 支出{' '}
-            <input type="radio" name="type" value="income" checked={type === 'income'} onChange={onChange} /> 收入
+              </Select>
+            </FormControl>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                margin="dense"
+                name="date"
+                label="日期"
+                type="date"
+                sx={{ flexGrow: 2 }}
+                value={date}
+                onChange={onChange}
+                required
+                // InputLabelProps={{ shrink: true }}
+              />
 
-            <h5>分類</h5>
-            <input type="text" placeholder="分類" name="category" value={category} onChange={onChange} required />
-            
-            <div>
-                <input type="submit" value="新增交易" className="btn btn-primary btn-block" />
-            </div>
+              <Button
+                variant="outlined"
+                sx={{ flexGrow: 1 }}
+                onClick={() => setCategoryDialogOpen(true)}
+              >
+                {category && subcategory ? `${subcategory}` : "選擇分類"}
+              </Button>
+            </Box>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                margin="dense"
+                name="amount"
+                label="金額"
+                type="number"
+                sx={{ flexGrow: 1 }}
+                value={amount}
+                onChange={onChange}
+                required
+              />
+              <FormControl component="fieldset" margin="dense">
+                <RadioGroup row name="type" value={type} onChange={onChange}>
+                  <FormControlLabel
+                    value="expense"
+                    control={<Radio />}
+                    label="支出"
+                  />
+                  <FormControlLabel
+                    value="income"
+                    control={<Radio />}
+                    label="收入"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Box>
+            <TextField
+              margin="dense"
+              name="notes"
+              label="備註"
+              type="text"
+              fullWidth
+              multiline
+              rows={2}
+              value={notes}
+              onChange={onChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeForm}>取消</Button>
+            <Button type="submit" variant="contained">
+              {current ? "更新" : "新增"}
+            </Button>
+          </DialogActions>
         </form>
-    );
+      </Dialog>
+      <CategorySelectionDialog
+        open={isCategoryDialogOpen}
+        onClose={() => setCategoryDialogOpen(false)}
+        onSelect={handleCategorySelect}
+        transactionType={type}
+      />
+    </>
+  );
 };
 
-export default TransactionForm; 
+export default TransactionForm;

@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
 import Investments from "./pages/Investments";
+import InvestmentDetail from "./pages/InvestmentDetail";
+import InvestmentReport from "./pages/InvestmentReport";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AuthContext from "./context/AuthContext";
@@ -21,6 +23,8 @@ import TransactionState from "./context/transaction/TransactionState.jsx";
 import DashboardState from "./context/dashboard/DashboardState.jsx";
 import InvestmentState from "./context/investment/InvestmentState.jsx";
 import TradeState from "./context/trade/TradeState";
+import CategoryState from "./context/category/CategoryState";
+import DividendState from "./context/dividend/DividendState.jsx";
 import AccountContext from "./context/account/accountContext";
 import TransactionContext from "./context/transaction/transactionContext";
 import "./App.css";
@@ -97,6 +101,22 @@ const AppContent = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/investment/:investmentId"
+            element={
+              <PrivateRoute>
+                <InvestmentDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/investment-report/:investmentId"
+            element={
+              <PrivateRoute>
+                <InvestmentReport />
+              </PrivateRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
@@ -113,7 +133,11 @@ function App() {
           <DashboardState>
             <InvestmentState>
               <TradeState>
-                <AppContent />
+                <CategoryState>
+                  <DividendState>
+                    <AppContent />
+                  </DividendState>
+                </CategoryState>
               </TradeState>
             </InvestmentState>
           </DashboardState>

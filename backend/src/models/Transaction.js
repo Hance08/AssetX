@@ -16,6 +16,9 @@ const transactionSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  subcategory: {
+    type: String,
+  },
   accountId: {
     type: Schema.Types.ObjectId,
     ref: 'Account',
@@ -29,6 +32,10 @@ const transactionSchema = new mongoose.Schema({
   notes: {
     type: String,
     trim: true,
+  },
+  transferId: {
+    type: Schema.Types.ObjectId,
+    default: null,
   },
 }, {
   timestamps: true,

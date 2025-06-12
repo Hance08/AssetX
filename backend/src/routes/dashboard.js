@@ -67,6 +67,7 @@ router.get('/monthly-summary', auth, async (req, res) => {
                 $match: {
                     userId: new mongoose.Types.ObjectId(req.user.id),
                     date: { $gte: startDate, $lte: endDate },
+                    category: { $ne: '帳戶轉帳' }
                 },
             },
             {
@@ -195,14 +196,125 @@ router.get('/net-worth-growth', auth, async (req, res) => {
         const today = new Date();
         const twelveMonthsAgo = new Date();
         twelveMonthsAgo.setMonth(today.getMonth() - 11);
-        twelveMonthsAgo.setDate(1); // 設定為 11 個月前那個月的第一天
+        twelveMonthsAgo.setDate(1); 
+        twelveMonthsAgo.setHours(0, 0, 0, 0);
 
+        // 1. 取得歷史快照
         const netWorthData = await MonthlyNetWorth.find({
             userId: req.user.id,
             date: { $gte: twelveMonthsAgo }
-        }).sort({ date: 'asc' });
+        }).sort({ date: 'asc' }).lean(); // .lean() for plain JS objects
 
-        res.json(netWorthData);
+        // 2. 計算當前即時淨值
+        const summary = await Account.aggregate([
+            { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
+            {
+                $group: {
+                    _id: '$type',
+                    total: { $sum: '$balance' },
+                },
+            },
+        ]);
+
+        let totalAssets = 0;
+        let totalLiabilities = 0;
+        summary.forEach(group => {
+            if (group._id === 'asset') totalAssets = group.total;
+            else if (group._id === 'liability') totalLiabilities = group.total;
+        });
+        const currentNetWorth = totalAssets - totalLiabilities;
+        
+        // 3. 組合數據
+        const currentMonthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        const currentMonthSnapshotIndex = netWorthData.findIndex(
+            item => 
+                item.date.getFullYear() === currentMonthDate.getFullYear() &&
+                item.date.getMonth() === currentMonthDate.getMonth()
+        );
+
+        if (currentMonthSnapshotIndex !== -1) {
+            // 如果當月快照已存在，用即時數據更新它
+            netWorthData[currentMonthSnapshotIndex].netWorth = currentNetWorth;
+            // 更新日期為當下，讓前端能辨識
+            netWorthData[currentMonthSnapshotIndex].date = today; 
+        } else {
+            // 如果當月快照不存在，新增一個即時數據點
+            netWorthData.push({
+                userId: req.user.id,
+                netWorth: currentNetWorth,
+                date: today
+            });
+        }
+        
+        // 確保數據點不超過12個，並按日期排序
+        const finalData = netWorthData.slice(-12).sort((a,b) => a.date - b.date);
+
+        res.json(finalData);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route    GET api/dashboard/daily-flow
+// @desc     取得指定月份的每日收支
+// @access   Private
+router.get('/daily-flow', auth, async (req, res) => {
+    try {
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+        const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 1));
+
+        const transactions = await Transaction.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(req.user.id),
+                    date: { $gte: startDate, $lt: endDate },
+                    category: { $ne: '帳戶轉帳' }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dayOfMonth: '$date' },
+                    totalIncome: {
+                        $sum: { $cond: [{ $gt: ['$amount', 0] }, '$amount', 0] }
+                    },
+                    totalExpense: {
+                        $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    day: '$_id',
+                    income: '$totalIncome',
+                    expense: { $abs: '$totalExpense' }
+                }
+            },
+            { $sort: { day: 1 } }
+        ]);
+
+        // 建立一個包含該月所有日期的基礎陣列
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const dailyData = Array.from({ length: daysInMonth }, (_, i) => ({
+            day: i + 1,
+            income: 0,
+            expense: 0
+        }));
+
+        // 將有交易的資料填入
+        transactions.forEach(t => {
+            const index = dailyData.findIndex(d => d.day === t.day);
+            if (index !== -1) {
+                dailyData[index] = t;
+            }
+        });
+
+        res.json(dailyData);
     } catch (error) {
         console.error(error.message);
         res.status(500).send('Server Error');

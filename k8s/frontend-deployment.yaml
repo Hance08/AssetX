@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetx-frontend
+  labels:
+    app: assetx-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assetx-frontend
+  template:
+    metadata:
+      labels:
+        app: assetx-frontend
+    spec:
+      containers:
+      - name: assetx-frontend
+        image: assetx-frontend
+        ports:
+        - containerPort: 80 

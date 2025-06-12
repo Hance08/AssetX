@@ -3,15 +3,37 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Transaction = require('../models/Transaction');
 const Account = require('../models/Account');
+const mongoose = require('mongoose');
 
 // @route   GET api/transactions
 // @desc    取得該使用者的所有交易紀錄
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.user.id })
+    const { limit, year, month } = req.query;
+
+    const findQuery = { userId: req.user.id };
+
+    if (year && month) {
+      const yearNum = parseInt(year, 10);
+      const monthNum = parseInt(month, 10);
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+      findQuery.date = { $gte: startDate, $lte: endDate };
+    }
+
+    let query = Transaction.find(findQuery)
       .populate('accountId', 'name')
       .sort({ date: -1 });
+
+    if (limit) {
+      const limitNum = parseInt(limit, 10);
+      if (limitNum > 0) {
+        query = query.limit(limitNum);
+      }
+    }
+
+    const transactions = await query;
     res.json(transactions);
   } catch (err) {
     console.error(err.message);
@@ -24,7 +46,7 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
   // 新的 API 接收 type 和一個正數的 amount
-  const { date, amount, category, accountId, notes, type } = req.body;
+  const { date, amount, category, subcategory, accountId, notes, type } = req.body;
 
   try {
     // 驗證 amount 必須是正數
@@ -47,6 +69,7 @@ router.post('/', auth, async (req, res) => {
       date: date || new Date(), // 如果前端沒提供 date，就使用當下時間
       amount: finalAmount,
       category,
+      subcategory,
       accountId,
       notes,
     });
@@ -66,11 +89,115 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// @route   POST api/transactions/transfer
+// @desc    新增一筆轉帳紀錄
+// @access  Private
+router.post('/transfer', auth, async (req, res) => {
+  const { fromAccountId, toAccountId, amount, date, notes } = req.body;
+  
+  try {
+    if (fromAccountId === toAccountId) {
+      return res.status(400).json({ msg: '轉出與轉入帳戶不能相同' });
+    }
+    if (amount <= 0) {
+      return res.status(400).json({ msg: '金額必須為正數' });
+    }
+
+    const fromAccount = await Account.findById(fromAccountId);
+    const toAccount = await Account.findById(toAccountId);
+
+    if (!fromAccount || !toAccount) {
+        return res.status(404).json({ msg: '找不到指定的帳戶' });
+    }
+    if (fromAccount.userId.toString() !== req.user.id || toAccount.userId.toString() !== req.user.id) {
+        return res.status(401).json({ msg: '無權限操作此帳戶' });
+    }
+    
+    const transferId = new mongoose.Types.ObjectId();
+
+    // 1. 更新帳戶餘額 (使用 $inc 確保原子性操作)
+    await Account.findByIdAndUpdate(fromAccountId, { $inc: { balance: -Math.abs(amount) } });
+    await Account.findByIdAndUpdate(toAccountId, { $inc: { balance: Math.abs(amount) } });
+
+    // 2. 建立轉出交易
+    const fromTransaction = new Transaction({
+      userId: req.user.id,
+      date: date || new Date(),
+      amount: -Math.abs(amount),
+      category: '帳戶轉帳',
+      accountId: fromAccountId,
+      notes: notes || `轉帳至 ${toAccount.name}`,
+      transferId,
+    });
+
+    // 3. 建立轉入交易
+    const toTransaction = new Transaction({
+        userId: req.user.id,
+        date: date || new Date(),
+        amount: Math.abs(amount),
+        category: '帳戶轉帳',
+        accountId: toAccountId,
+        notes: notes || `從 ${fromAccount.name} 轉入`,
+        transferId,
+    });
+    
+    await fromTransaction.save();
+    await toTransaction.save();
+    
+    res.json({ msg: '轉帳成功' });
+
+  } catch (error) {
+    console.error(error.message);
+    // 在非事務性操作中，如果出錯，很難安全地回滾。
+    // 開發中，我們先記錄錯誤，以便於調試。
+    // 生產環境可能需要更複雜的補償邏輯。
+    res.status(500).send('伺服器錯誤：轉帳失敗');
+  }
+});
+
+// @route   DELETE api/transactions/transfer/:transferId
+// @desc    刪除一整筆轉帳（兩筆交易）
+// @access  Private
+router.delete('/transfer/:transferId', auth, async (req, res) => {
+  try {
+    const { transferId } = req.params;
+
+    // 找到所有與此 transferId 相關的交易
+    const transactions = await Transaction.find({ transferId, userId: req.user.id });
+
+    if (!transactions || transactions.length === 0) {
+      return res.status(404).json({ msg: '找不到該轉帳紀錄' });
+    }
+
+    // 更新相關帳戶的餘額
+    const accountUpdates = transactions.map(t => {
+      return {
+        updateOne: {
+          filter: { _id: t.accountId },
+          update: { $inc: { balance: -t.amount } }
+        }
+      };
+    });
+    
+    if (accountUpdates.length > 0) {
+      await Account.bulkWrite(accountUpdates);
+    }
+    
+    // 刪除所有相關交易
+    await Transaction.deleteMany({ transferId, userId: req.user.id });
+
+    res.json({ msg: '轉帳紀錄已刪除' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('伺服器錯誤');
+  }
+});
+
 // @route   PUT api/transactions/:id
 // @desc    更新一筆交易紀錄
 // @access  Private
 router.put('/:id', auth, async (req, res) => {
-  const { date, amount, category, accountId, notes, type } = req.body;
+  const { date, amount, category, subcategory, accountId, notes, type } = req.body;
 
   try {
     let transaction = await Transaction.findById(req.params.id);
@@ -94,7 +221,7 @@ router.put('/:id', auth, async (req, res) => {
     }
     
     // 建立更新物件
-    const transactionFields = { date, amount: newAmount, category, accountId, notes };
+    const transactionFields = { date, amount: newAmount, category, subcategory, accountId, notes };
 
     let updatedTransaction = await Transaction.findByIdAndUpdate(
       req.params.id,
