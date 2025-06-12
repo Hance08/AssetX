@@ -4,7 +4,7 @@ metadata:
   name: assetx
 build:
   local:
-    push: true
+    push: false
   artifacts:
     - image: assetx-backend
       context: backend
