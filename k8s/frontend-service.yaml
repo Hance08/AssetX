@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: assetx-frontend
 spec:
-  type: LoadBalancer # 如果您在本地端 (例如 Minikube) 執行，請考慮使用 NodePort
+  type: NodePort # 我們回到 NodePort 模式，以進行更底層的除錯
   selector:
     app: assetx-frontend
   ports:
