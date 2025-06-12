@@ -15,5 +15,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Skaffold
-        # Skaffold 會使用 skaffold.yaml 中預設的 localhost:5000 作為倉庫
+        # 這是正確的做法：透過環境變數來設定倉庫
+        env:
+          SKAFFOLD_DEFAULT_REPO: localhost:5000
+        # Skaffold 會使用上面的環境變數作為預設倉庫
         run: skaffold run --filename skaffold.yaml 
