@@ -1,0 +1,19 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main # 當推送到 main 分支時觸發
+
+jobs:
+  build-and-deploy:
+    # 這是關鍵：指定此任務要在自託管的執行器上執行
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Skaffold
+        # Skaffold 會使用 skaffold.yaml 中預設的 localhost:5000 作為倉庫
+        run: skaffold run --filename skaffold.yaml 
