@@ -15,8 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Skaffold
-        # 這是正確的做法：透過環境變數來設定倉庫
-        env:
-          SKAFFOLD_DEFAULT_REPO: localhost:5000
-        # Skaffold 會使用上面的環境變數作為預設倉庫
-        run: skaffold run --filename skaffold.yaml 
+        # 執行此指令，將後續的 docker 指令都指向 Minikube 內部的 Docker daemon
+        run: |
+          eval $(minikube -p minikube docker-env)
+          skaffold run --filename skaffold.yaml 
