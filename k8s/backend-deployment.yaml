@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assetx-backend
+  labels:
+    app: assetx-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assetx-backend
+  template:
+    metadata:
+      labels:
+        app: assetx-backend
+    spec:
+      containers:
+      - name: assetx-backend
+        image: assetx-backend
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: backend-secret 

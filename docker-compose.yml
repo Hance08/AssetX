@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  # 後端服務設定
+  backend:
+    build:
+      context: ./backend # Dockerfile 所在的目錄
+      dockerfile: Dockerfile
+    container_name: assetx-backend
+    ports:
+      - "5000:5000" # 將主機的 5001 port 映射到容器的 5001 port
+    env_file:
+      - ./backend/.env # 建議將後端的環境變數 (如資料庫連線) 放在 .env 檔案中
+    restart: unless-stopped
+
+  # 前端服務設定
+  frontend:
+    build:
+      context: ./frontend # Dockerfile 所在的目錄
+      dockerfile: Dockerfile
+    container_name: assetx-frontend
+    ports:
+      - "9300:80" # 將主機的 8080 port 映射到容器中 Nginx 的 80 port
+    depends_on:
+      - backend # 確保後端服務會先於前端服務啟動
+    restart: unless-stopped
+# 可以選擇性地定義一個共用網路
+# networks:
+#   app-network:
+#     driver: bridge

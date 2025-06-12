@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: assetx-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: assetx-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000 

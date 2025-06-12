@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: assetx
+build:
+  defaultRepo: localhost:5000 # CI/CD 流程的預設倉庫 (在 self-hosted runner 上)
+  local:
+    push: true # 設定為 true，Skaffold 會將映像檔推送到遠端倉庫
+  artifacts:
+    - image: assetx-backend
+      context: backend
+      docker:
+        dockerfile: Dockerfile
+    - image: assetx-frontend
+      context: frontend
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - k8s/*.yaml
+deploy:
+  kubectl: {} 
