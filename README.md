@@ -16,27 +16,30 @@
 
 ## 開發
 
-若要在本機執行此專案，請確定您已安裝 Docker 和 Docker Compose。
+若要在本機執行此專案，請確定您已安裝 Docker、Docker Compose 和 MongoDB。
 
 1.  **Clone 專案**
+   
+     ```bash
+      git clone https://github.com/your-username/AssetX.git
+      ```
+     
+2.  **在後端跟目錄下新增.env檔案**
+   
+     ```bash
+      MONGO_URI=<你自己的MongoDB_URI>
+      JWT_SECRET=<你自己的JWT密鑰>
+      PORT=5000
+      ``` 
 
-    ```bash
-    git clone https://github.com/your-username/AssetX.git
-    cd AssetX
-    ```
+3.  **啟動服務**
 
-2.  **啟動服務**
-
-    使用 Docker Compose 啟動所有服務：
+    喊回到AssetX跟目錄，使用 Docker Compose 啟動所有服務：
 
     ```bash
     docker-compose up --build
     ```
 
-3.  **存取應用程式**
+4.  **存取應用程式**
     - **前端**: `http://localhost:9300`
     - **後端**: `http://localhost:5000`
-
-## 部署
-
-此專案已設定為使用 Skaffold 進行 Kubernetes 部署。有關詳細資訊，請參閱 `skaffold.yaml` 和 `k8s/` 目錄中的設定檔。
