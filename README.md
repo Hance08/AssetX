@@ -16,6 +16,7 @@
 ## 開發
 
 若要在本機執行此專案，請確定您已安裝 Docker、Docker Compose 和 MongoDB。
+並且在MongoDB中新增一個名為assetX的資料庫。
 
 1.  **Clone 專案**
    
